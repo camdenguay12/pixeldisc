@@ -63,13 +63,18 @@ function pathForShot(){
   }else{
    const earlyTurn=d.turn*Math.pow(Math.sin(Math.PI*t),2)*Math.min(1,power/65)*(1-Math.min(.96,hyzer*.32))*(turnEnabled&&release===0?.72:1);
    const lateFade=d.fade*Math.pow(t,3)*(turnEnabled&&release===0?.78:1);
-   const hyzerCurve=hyzer*stability*28*smooth((t-.07)/.93);
-   // +3 hooks sharply near the end instead of maintaining a long diagonal fade.
-   const hook=hyzer===3?(23+stability*19)*smooth((t-.69)/.31):0;
-   lateral=hand*(earlyTurn+lateFade+hyzerCurve+hook);
+   if(hyzer===3){
+    // Keep the launch line straight, then bend continuously into a broad left hook.
+    const bend=Math.max(0,(t-.34)/.66);
+    const hook=(48+stability*45)*bend*bend;
+    lateral=hand*(earlyTurn*.35+hook);
+   }else{
+    const hyzerCurve=hyzer*stability*28*smooth((t-.07)/.93);
+    lateral=hand*(earlyTurn+lateFade+hyzerCurve);
+   }
   }
   const drift=smooth(t);
-  const forward=hyzer===3?t-.13*smooth((t-.69)/.31):t;
+  const forward=hyzer===3?t-.23*Math.pow(Math.max(0,(t-.34)/.66),3):t;
   path.push([pos[0]+Math.sin(a)*range*forward+Math.cos(a)*lateral+spreadX*drift,pos[1]-Math.cos(a)*range*forward+Math.sin(a)*lateral+spreadY*drift]);
  }
  return path
