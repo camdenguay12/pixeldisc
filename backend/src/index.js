@@ -23,6 +23,10 @@ export default {async fetch(request,env){
   }
   return respond({ok:true,date:day,daily,allTime})
  }
+ if(request.method==='GET'&&url.pathname==='/ace-leaderboard'){
+  const {results}=await env.DB.prepare("SELECT COALESCE(p.display_name,'----') AS name,MAX(a.aces) AS aces FROM ace_runs a JOIN players p ON p.id=a.player_id WHERE a.day=? AND p.display_name IS NOT NULL GROUP BY a.player_id ORDER BY aces DESC,MIN(a.created_at) ASC LIMIT 10").bind(day).all();
+  return respond({ok:true,date:day,rows:results})
+ }
  if(request.method==='GET'&&url.pathname==='/stats'){
   const row=await env.DB.prepare("SELECT COUNT(DISTINCT CASE WHEN event='visit' THEN session END) AS visitors, SUM(CASE WHEN event='round_start' THEN 1 ELSE 0 END) AS roundsStarted, SUM(CASE WHEN event='round_complete' THEN 1 ELSE 0 END) AS roundsCompleted, SUM(CASE WHEN event='hole_complete' THEN 1 ELSE 0 END) AS holesPlayed FROM activity WHERE day=?").bind(day).first();
   const {results}=await env.DB.prepare("SELECT day AS date, SUM(CASE WHEN event='hole_complete' THEN 1 ELSE 0 END) AS holesPlayed FROM activity GROUP BY day ORDER BY day DESC LIMIT 7").all();
@@ -41,9 +45,15 @@ export default {async fetch(request,env){
    const saved=await env.DB.prepare('SELECT state,updated_at FROM saved_rounds WHERE player_id=?').bind(playerId).first();
    const rounds=await env.DB.prepare('SELECT id,layout,holes,throws,par,score,completed_at FROM player_rounds WHERE player_id=? ORDER BY completed_at DESC LIMIT 100').bind(playerId).all();
    const stats=await env.DB.prepare('SELECT COUNT(*) AS rounds,COALESCE(SUM(holes),0) AS holes,COALESCE(SUM(throws),0) AS throws FROM player_rounds WHERE player_id=?').bind(playerId).first();
-   return respond({ok:true,player:{id:player.id,name:player.display_name},saved:saved?JSON.parse(saved.state):null,history:rounds.results,stats})
+   const aceBest=await env.DB.prepare('SELECT MAX(aces) AS best,COUNT(*) AS runs FROM ace_runs WHERE player_id=?').bind(playerId).first();return respond({ok:true,player:{id:player.id,name:player.display_name},saved:saved?JSON.parse(saved.state):null,history:rounds.results,stats,aceBest:{best:aceBest?.best??null,runs:aceBest?.runs||0}})
   }
   let data;try{data=await request.json()}catch{return respond({ok:false,error:'Invalid JSON'},400)}
+  if(data.action==='ace_run'){
+   const id=String(data.id||''),aces=Number(data.aces);
+   if(!/^[-a-zA-Z0-9]{8,100}$/.test(id)||!Number.isInteger(aces)||aces<0||aces>10)return respond({ok:false,error:'Invalid ace run'},400);
+   await env.DB.prepare('INSERT OR IGNORE INTO ace_runs(id,player_id,day,aces) VALUES(?,?,?,?)').bind(id,playerId,day,aces).run();
+   return respond({ok:true,stored:true})
+  }
   if(data.action==='remove_name'){await env.DB.prepare('UPDATE players SET display_name=NULL WHERE id=?').bind(playerId).run();return respond({ok:true,stored:true,name:null})}
   if(data.action==='name'){const name=String(data.name||'').toUpperCase();if(!/^[A-Z0-9]{4}$/.test(name))return respond({ok:false,error:'Use four letters or numbers'},400);try{const taken=await env.DB.prepare('SELECT id FROM players WHERE display_name=? AND id<>? LIMIT 1').bind(name,playerId).first();if(taken)return respond({ok:false,error:'Username already taken. Choose another four-character name.',code:'NAME_TAKEN'},409);await env.DB.prepare('UPDATE players SET display_name=? WHERE id=?').bind(name,playerId).run();return respond({ok:true,stored:true,name})}catch(e){if(/UNIQUE constraint failed/i.test(String(e)))return respond({ok:false,error:'Username already taken. Choose another four-character name.',code:'NAME_TAKEN'},409);throw e}}
   if(data.action==='save'){
