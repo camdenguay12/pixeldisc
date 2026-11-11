@@ -69,8 +69,6 @@ $('playerProfile').onclick=()=>{$('profileOverlay').classList.remove('hidden');r
 $('closeProfile').onclick=()=>$('profileOverlay').classList.add('hidden');
 $('profileOverlay').addEventListener('click',e=>{if(e.target===$('profileOverlay'))$('closeProfile').click()});
 $('saveProfileName').onclick=async()=>{const name=$('profileName').value.trim().toUpperCase();if(!/^[A-Z0-9]{4}$/.test(name)){$('profileStatus').textContent='Enter exactly four letters or numbers.';return}try{await playerRequest({action:'name',name});$('profileStatus').textContent='Name saved';$('leaderName').value=name;await loadPlayer()}catch(e){$('profileStatus').textContent='Could not sync name: '+e.message}};
-loadPlayer();
-
 const BACKEND_URL="https://pixeldisc-api.camdenguay12.workers.dev";
 const sessionId=(()=>{try{let id=sessionStorage.getItem('pixeldisc-session');if(!id){id=crypto.randomUUID();sessionStorage.setItem('pixeldisc-session',id)}return id}catch(e){return 'session-'+Math.random().toString(36).slice(2,15)}})();
 async function apiRequest(path,options={}){
@@ -104,7 +102,7 @@ $('testConnection').onclick=async()=>{
   const health=await apiRequest('/health');if(!health.ok)throw Error('Health check failed');
   const leaderboard=await backendRead({action:'leaderboard'});if(!leaderboard.daily)throw Error('Leaderboard response invalid');
   status.textContent='READ OK. Sending test visit…';
-  const result=await sendGameEvent('activity',{event:'visit',holes:0});
+  const result=await sendGameEvent('activity',{event:'visit',holes:0});loadPlayer();
   status.textContent=result.sent&&result.verified?'READ OK · WRITE CONFIRMED IN D1':('READ OK · WRITE FAILED: '+(result.error||'Not confirmed'))
  }catch(e){status.textContent='CONNECTION FAILED: '+e.message}
  finally{button.disabled=false}
