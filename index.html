@@ -87,7 +87,7 @@ async function sendGameEvent(action,extra={}){
 function backendRead(params){return apiRequest(params.action==='stats'?'/stats':'/leaderboard')}
 function scoreText(n){return n>0?'+'+n:n===0?'E':String(n)}
 function leaderboardTable(rows){return rows.length?'<table><thead><tr><th>#</th><th>PLAYER</th><th>TO PAR</th><th>THROWS</th></tr></thead><tbody>'+rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+String(r.name).replace(/[^A-Z0-9]/g,'').slice(0,4)+'</td><td>'+scoreText(Number(r.score))+'</td><td>'+Number(r.throws)+'</td></tr>').join('')+'</tbody></table>':'No scores yet. Be the first!'}
-async function refreshLeaderboard(){const layout=$('leaderLength').value,el=$('leaderResults');try{const data=await backendRead({action:'leaderboard'});if($('leaderLength').value!==layout)return;el.innerHTML=leaderboardTable(data.daily?.[layout]||[]);const permanent=['front9','back9','full18'].includes(layout);$('allTimePanel').classList.toggle('hidden',!permanent);if(permanent)$('allTimeResults').innerHTML=leaderboardTable(data.allTime?.[layout]||[])}catch(e){el.textContent='Leaderboard unavailable: '+e.message+'. Try again.'}}
+async function refreshLeaderboard(){const layout=$('leaderLength').value,el=$('leaderResults');try{const data=await backendRead({action:'leaderboard'});if(!data.daily||!data.allTime)throw Error('Unexpected leaderboard fields: '+Object.keys(data).join(', '));if($('leaderLength').value!==layout)return;el.innerHTML=leaderboardTable(data.daily?.[layout]||[]);const permanent=['front9','back9','full18'].includes(layout);$('allTimePanel').classList.toggle('hidden',!permanent);if(permanent)$('allTimeResults').innerHTML=leaderboardTable(data.allTime?.[layout]||[])}catch(e){el.textContent='Leaderboard unavailable: '+e.message+'. Try again.'}}
 async function refreshDailyStats(){try{const d=await backendRead({action:'stats'});$('dailyStats').textContent='TODAY · '+(d.today?.holesPlayed||0)+' HOLES PLAYED · '+(d.today?.roundsStarted||0)+' ROUNDS STARTED · '+(d.today?.visitors||0)+' VISITORS';if(d.history?.length)$('dailyStats').textContent+=' | HISTORY: '+d.history.slice(-7).map(x=>x.date+': '+x.holesPlayed+' holes').join(' · ')}catch(e){$('dailyStats').textContent='Stats unavailable: '+e.message}}
 $('leaderLength').onchange=()=>{if(!$('leaderboardOverlay').classList.contains('hidden'))refreshLeaderboard()};
 $('leaderboardToggle').onclick=()=>{$('leaderboardOverlay').classList.remove('hidden');$('leaderboardToggle').setAttribute('aria-expanded','true');refreshLeaderboard();$('closeLeaderboard').focus()};
@@ -100,9 +100,9 @@ $('testConnection').onclick=async()=>{
  try{
   status.textContent='Checking Cloudflare API and database…';
   const health=await apiRequest('/health');if(!health.ok)throw Error('Health check failed');
-  const leaderboard=await backendRead({action:'leaderboard'});if(!leaderboard.daily)throw Error('Leaderboard response invalid');
+  const leaderboard=await backendRead({action:'leaderboard'});if(!leaderboard.daily||!leaderboard.allTime)throw Error('Leaderboard format mismatch. Returned fields: '+Object.keys(leaderboard).join(', '));
   status.textContent='READ OK. Sending test visit…';
-  const result=await sendGameEvent('activity',{event:'visit',holes:0});loadPlayer();
+  const result=await sendGameEvent('activity',{event:'visit',holes:0});
   status.textContent=result.sent&&result.verified?'READ OK · WRITE CONFIRMED IN D1':('READ OK · WRITE FAILED: '+(result.error||'Not confirmed'))
  }catch(e){status.textContent='CONNECTION FAILED: '+e.message}
  finally{button.disabled=false}
