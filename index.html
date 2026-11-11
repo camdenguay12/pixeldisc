@@ -119,15 +119,18 @@ function pathForShot(){
    const turnAmount=(anhyzer/3)*2*(17+stability*23)*powerTurn;
    const turnProgress=smooth((t-turnStart)/(.67));
    const fadeAmount=(d.fade*.18+stability*2.3)*(1-.12*anhyzer);
-   const fadeProgress=smooth((t-fadeStart)/(.24));
+   // Keep fade moving in one direction right through the final frame.
+   // Unlike smoothstep, quadratic easing never slows into a flat/reversing tail.
+   const fadeT=Math.max(0,(t-fadeStart)/(1-fadeStart));
+   const fadeProgress=fadeT*fadeT;
    lateral=hand*(-turnAmount*turnProgress+fadeAmount*fadeProgress);
   }else{
    const earlyTurn=d.turn*Math.pow(Math.sin(Math.PI*t),2)*Math.min(1,power/65)*(1-Math.min(.96,hyzer*.32))*(turnEnabled&&release===0?.72:1);
    const lateFade=d.fade*Math.pow(t,3)*(turnEnabled&&release===0?.78:1);
-   if(hyzer===3){
-    // Keep the launch line straight, then bend continuously into a broad left hook.
+   if(hyzer>=2){
+    // +2 shares the clean late-hook trajectory of +3, but bends less.
     const bend=Math.max(0,(t-.34)/.66);
-    const hook=(48+stability*45)*bend*bend;
+    const hook=(48+stability*45)*(hyzer===3?1:.62)*bend*bend;
     lateral=hand*(earlyTurn*.35+hook);
    }else{
     const hyzerCurve=hyzer*stability*28*smooth((t-.07)/.93);
@@ -135,7 +138,7 @@ function pathForShot(){
    }
   }
   const drift=smooth(t);
-  const forward=hyzer===3?t-.23*Math.pow(Math.max(0,(t-.34)/.66),3):t;
+  const forward=hyzer>=2?t-(hyzer===3?.23:.12)*Math.pow(Math.max(0,(t-.34)/.66),3):t;
   path.push([pos[0]+Math.sin(a)*range*forward+Math.cos(a)*lateral+spreadX*drift,pos[1]-Math.cos(a)*range*forward+Math.sin(a)*lateral+spreadY*drift]);
  }
  return path
