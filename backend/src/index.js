@@ -3,7 +3,7 @@ const LENGTHS=[3,6,9,18];
 const LAYOUTS={random3:3,random6:6,front9:9,back9:9,full18:18};
 const PERMANENT=['front9','back9','full18'];
 const today=()=>new Date().toISOString().slice(0,10);
-function respond(data,status=200,origin=ORIGIN){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type','Vary':'Origin'}})}
+function respond(data,status=200,origin=ORIGIN){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, X-Player-Id, X-Player-Token','Vary':'Origin'}})}
 export default {async fetch(request,env){
  const origin=request.headers.get('Origin');const allowed=!origin||origin===ORIGIN||origin==='http://localhost:8787'||origin==='http://127.0.0.1:8787';
  if(!allowed)return respond({ok:false,error:'Origin not allowed'},403);
@@ -25,6 +25,37 @@ export default {async fetch(request,env){
   const row=await env.DB.prepare("SELECT COUNT(DISTINCT CASE WHEN event='visit' THEN session END) AS visitors, SUM(CASE WHEN event='round_start' THEN 1 ELSE 0 END) AS roundsStarted, SUM(CASE WHEN event='round_complete' THEN 1 ELSE 0 END) AS roundsCompleted, SUM(CASE WHEN event='hole_complete' THEN 1 ELSE 0 END) AS holesPlayed FROM activity WHERE day=?").bind(day).first();
   const {results}=await env.DB.prepare("SELECT day AS date, SUM(CASE WHEN event='hole_complete' THEN 1 ELSE 0 END) AS holesPlayed FROM activity GROUP BY day ORDER BY day DESC LIMIT 7").all();
   return respond({ok:true,today:{visitors:row?.visitors||0,roundsStarted:row?.roundsStarted||0,roundsCompleted:row?.roundsCompleted||0,holesPlayed:row?.holesPlayed||0},history:results.reverse()})
+ }
+ const playerId=String(request.headers.get('X-Player-Id')||'');
+ const playerToken=String(request.headers.get('X-Player-Token')||'');
+ const authorized=/^[a-zA-Z0-9_-]{20,100}$/.test(playerId)&&/^[a-zA-Z0-9_-]{32,150}$/.test(playerToken);
+ if(url.pathname==='/player'&&['GET','POST'].includes(request.method)){
+  if(!authorized)return respond({ok:false,error:'Invalid player credentials'},401);
+  const encoder=new TextEncoder(),bytes=await crypto.subtle.digest('SHA-256',encoder.encode(playerToken));
+  const tokenHash=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
+  let player=await env.DB.prepare('SELECT id,display_name FROM players WHERE id=? AND token_hash=?').bind(playerId,tokenHash).first();
+  if(!player){const existing=await env.DB.prepare('SELECT id FROM players WHERE id=?').bind(playerId).first();if(existing)return respond({ok:false,error:'Player credential mismatch'},403);await env.DB.prepare('INSERT INTO players(id,token_hash) VALUES(?,?)').bind(playerId,tokenHash).run();player={id:playerId,display_name:null}}
+  if(request.method==='GET'){
+   const saved=await env.DB.prepare('SELECT state,updated_at FROM saved_rounds WHERE player_id=?').bind(playerId).first();
+   const rounds=await env.DB.prepare('SELECT id,layout,holes,throws,par,score,completed_at FROM player_rounds WHERE player_id=? ORDER BY completed_at DESC LIMIT 100').bind(playerId).all();
+   const stats=await env.DB.prepare('SELECT COUNT(*) AS rounds,COALESCE(SUM(holes),0) AS holes,COALESCE(SUM(throws),0) AS throws FROM player_rounds WHERE player_id=?').bind(playerId).first();
+   return respond({ok:true,player:{id:player.id,name:player.display_name},saved:saved?JSON.parse(saved.state):null,history:rounds.results,stats})
+  }
+  let data;try{data=await request.json()}catch{return respond({ok:false,error:'Invalid JSON'},400)}
+  if(data.action==='name'){const name=String(data.name||'').toUpperCase();if(!/^[A-Z0-9]{4}$/.test(name))return respond({ok:false,error:'Use four letters or numbers'},400);await env.DB.prepare('UPDATE players SET display_name=? WHERE id=?').bind(name,playerId).run();return respond({ok:true,stored:true})}
+  if(data.action==='save'){
+   const state=data.state;if(!state||typeof state!=='object'||!Array.isArray(state.roundHoles)||state.roundHoles.length>18||!state.roundHoles.every(n=>Number.isInteger(n)&&n>=0&&n<18)||!Number.isInteger(state.roundIndex)||state.roundIndex<0||state.roundIndex>=state.roundHoles.length||!Array.isArray(state.pos)||state.pos.length!==2||!state.pos.every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=-50&&n<=500)||!Number.isInteger(state.strokes)||state.strokes<0||state.strokes>100)return respond({ok:false,error:'Invalid saved round'},400);
+   const json=JSON.stringify(state);if(json.length>4000)return respond({ok:false,error:'Saved round too large'},413);
+   await env.DB.prepare('INSERT INTO saved_rounds(player_id,state) VALUES(?,?) ON CONFLICT(player_id) DO UPDATE SET state=excluded.state,updated_at=strftime(\'%Y-%m-%dT%H:%M:%fZ\',\'now\')').bind(playerId,json).run();return respond({ok:true,stored:true})
+  }
+  if(data.action==='clear'){await env.DB.prepare('DELETE FROM saved_rounds WHERE player_id=?').bind(playerId).run();return respond({ok:true,stored:true})}
+  if(data.action==='complete'){
+   const id=String(data.id||''),layout=String(data.layout||''),holes=Number(data.holes),throws=Number(data.throws),par=Number(data.par);
+   if(!/^[-a-zA-Z0-9]{8,100}$/.test(id)||!Object.hasOwn(LAYOUTS,layout)||LAYOUTS[layout]!==holes||!Number.isInteger(throws)||throws<holes||throws>holes*30||!Number.isInteger(par)||par<holes*2||par>holes*6)return respond({ok:false,error:'Invalid completed round'},400);
+   await env.DB.prepare('INSERT OR IGNORE INTO player_rounds(id,player_id,layout,holes,throws,par,score) VALUES(?,?,?,?,?,?,?)').bind(id,playerId,layout,holes,throws,par,throws-par).run();
+   await env.DB.prepare('DELETE FROM saved_rounds WHERE player_id=?').bind(playerId).run();return respond({ok:true,stored:true})
+  }
+  return respond({ok:false,error:'Unknown player action'},400)
  }
  if(request.method==='POST'&&url.pathname==='/event'){
   if(Number(request.headers.get('Content-Length')||0)>4096)return respond({ok:false,error:'Payload too large'},413);
