@@ -1,13 +1,15 @@
-const ORIGIN='https://camdenguay12.github.io';
+const ORIGIN='https://pixeldiscgame.com';
+const ALLOWED_ORIGINS=new Set([ORIGIN,'https://www.pixeldiscgame.com','https://camdenguay12.github.io','http://localhost:8787','http://127.0.0.1:8787']);
 const LENGTHS=[3,6,9,18];
 const LAYOUTS={random3:3,random6:6,front9:9,back9:9,full18:18};
 const PERMANENT=['front9','back9','full18'];
 const today=()=>new Date().toISOString().slice(0,10);
-function respond(data,status=200,origin=ORIGIN){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, X-Player-Id, X-Player-Token','Vary':'Origin'}})}
+function baseRespond(data,status=200,origin=ORIGIN){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, X-Player-Id, X-Player-Token','Vary':'Origin'}})}
 export default {async fetch(request,env){
- const origin=request.headers.get('Origin');const allowed=!origin||origin===ORIGIN||origin==='http://localhost:8787'||origin==='http://127.0.0.1:8787';
+ const origin=request.headers.get('Origin');const allowed=!origin||ALLOWED_ORIGINS.has(origin);
+ const respond=(data,status=200)=>baseRespond(data,status,allowed&&origin?origin:ORIGIN);
  if(!allowed)return respond({ok:false,error:'Origin not allowed'},403);
- if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{'Access-Control-Allow-Origin':origin||ORIGIN,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type','Access-Control-Max-Age':'86400'}});
+ if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{'Access-Control-Allow-Origin':origin||ORIGIN,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, X-Player-Id, X-Player-Token','Access-Control-Max-Age':'86400'}});
  if(!env.DB)return respond({ok:false,error:'D1 binding DB is missing'},503);
  try{
  const url=new URL(request.url),day=today();
