@@ -55,7 +55,7 @@ function pathForShot(){
    // One continuous rightward turn, followed by one small late fade.
    // Even at full fade, each anhyzer level ends progressively farther right of the tee line.
    const turnStart=.09,fadeStart=.76;
-   const turnAmount=anhyzer*(17+stability*23)*powerTurn;
+   const turnAmount=(anhyzer/3)*2*(17+stability*23)*powerTurn;
    const turnProgress=smooth((t-turnStart)/(.67));
    const fadeAmount=(d.fade*.18+stability*2.3)*(1-.12*anhyzer);
    const fadeProgress=smooth((t-fadeStart)/(.24));
