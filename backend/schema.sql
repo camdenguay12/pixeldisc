@@ -13,3 +13,7 @@ CREATE TABLE IF NOT EXISTS players(id TEXT PRIMARY KEY,token_hash TEXT NOT NULL,
 CREATE TABLE IF NOT EXISTS saved_rounds(player_id TEXT PRIMARY KEY REFERENCES players(id),state TEXT NOT NULL,updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')));
 CREATE TABLE IF NOT EXISTS player_rounds(id TEXT PRIMARY KEY,player_id TEXT NOT NULL REFERENCES players(id),layout TEXT NOT NULL,holes INTEGER NOT NULL,throws INTEGER NOT NULL,par INTEGER NOT NULL,score INTEGER NOT NULL,completed_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')));
 CREATE INDEX IF NOT EXISTS player_rounds_history ON player_rounds(player_id,completed_at DESC);
+
+-- Daily ace-run records used by the Worker.
+CREATE TABLE IF NOT EXISTS ace_runs (id TEXT PRIMARY KEY, player_id TEXT NOT NULL REFERENCES players(id), day TEXT NOT NULL, aces INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')));
+CREATE INDEX IF NOT EXISTS ace_runs_daily ON ace_runs(day,player_id,aces DESC);
