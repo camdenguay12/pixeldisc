@@ -275,5 +275,11 @@ $('submitScore').onclick=async()=>{
 };
 sendGameEvent('activity',{event:'visit',holes:0});loadPlayer();
 
-const p=$('preview'),pc=p.getContext('2d');pc.imageSmoothingEnabled=false;pc.fillStyle='#fff';pc.fillRect(0,0,110,140);function px(x,y,w,h,c){pc.fillStyle=c;pc.fillRect(x,y,w,h)}for(const [x,y] of [[16,30],[84,23],[22,92],[88,98]]){px(x-9,y-5,18,17,'#376547');px(x-7,y-9,14,14,'#6ca86b');px(x-3,y+11,6,8,'#8e6942')}px(50,26,12,3,'#e5b748');px(52,29,8,8,'#a9b8aa');px(55,27,2,17,'#35483d');px(51,43,10,2,'#35483d');drawPreviewDisc();pc.strokeStyle='#89958c';pc.setLineDash([2,3]);pc.beginPath();pc.moveTo(56,101);pc.lineTo(56,47);pc.stroke();
+const p=$('preview'),pc=p.getContext('2d');pc.imageSmoothingEnabled=false;pc.fillStyle='#fff';pc.fillRect(0,0,110,140);function px(x,y,w,h,c){pc.fillStyle=c;pc.fillRect(x,y,w,h)}for(const [x,y] of [[16,30],[84,23],[22,92],[88,98]]){px(x-9,y-5,18,17,'#376547');px(x-7,y-9,14,14,'#6ca86b');px(x-3,y+11,6,8,'#8e6942')}// Small pixel turkey in the clearing between the two left-side trees.
+// Fan tail, brown body, red wattle, orange beak and feet.
+px(27,56,3,4,'#a36b43');px(30,53,3,6,'#bd8753');px(33,52,3,7,'#8f5937');px(36,54,3,6,'#bd8753');px(39,57,3,4,'#a36b43');
+px(29,59,12,3,'#6f432e');px(32,62,9,9,'#855032');px(35,65,7,6,'#a46b43');
+px(39,57,6,7,'#895433');px(42,54,5,5,'#9b6039');px(45,55,2,2,'#1e211d');px(47,58,4,2,'#e2a044');px(45,60,2,4,'#c94b40');
+px(34,71,2,4,'#d99b43');px(39,71,2,4,'#d99b43');px(32,74,5,2,'#d99b43');px(38,74,5,2,'#d99b43');
+px(50,26,12,3,'#e5b748');px(52,29,8,8,'#a9b8aa');px(55,27,2,17,'#35483d');px(51,43,10,2,'#35483d');drawPreviewDisc();pc.strokeStyle='#89958c';pc.setLineDash([2,3]);pc.beginPath();pc.moveTo(56,101);pc.lineTo(56,47);pc.stroke();
 </script></body></html>
