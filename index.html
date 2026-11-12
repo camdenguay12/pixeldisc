@@ -293,13 +293,18 @@ $('submitScore').onclick=async()=>{
 };
 sendGameEvent('activity',{event:'visit',holes:0});loadPlayer();
 
-const p=$('preview'),pc=p.getContext('2d');pc.imageSmoothingEnabled=false;pc.fillStyle='#fff';pc.fillRect(0,0,110,140);function px(x,y,w,h,c){pc.fillStyle=c;pc.fillRect(x,y,w,h)}for(const [x,y] of [[16,30],[84,23],[22,92],[88,98]]){px(x-9,y-5,18,17,'#376547');px(x-7,y-9,14,14,'#6ca86b');px(x-3,y+11,6,8,'#8e6942')}// Small left-facing pixel turkey in the clearing between the right-side trees.
-// Draw at reduced scale so the turkey fits naturally into the course preview.
-(function(){const pixels=[
-[27,56,3,4,'#a36b43'],[30,53,3,6,'#bd8753'],[33,52,3,7,'#8f5937'],[36,54,3,6,'#bd8753'],[39,57,3,4,'#a36b43'],
-[29,59,12,3,'#6f432e'],[32,62,9,9,'#855032'],[35,65,7,6,'#a46b43'],
-[39,57,6,7,'#895433'],[42,54,5,5,'#9b6039'],[45,55,2,2,'#1e211d'],[47,58,4,2,'#e2a044'],[45,60,2,4,'#c94b40'],
-[34,71,2,4,'#d99b43'],[39,71,2,4,'#d99b43'],[32,74,5,2,'#d99b43'],[38,74,5,2,'#d99b43']
-];for(const [x,y,w,h,color] of pixels){pc.fillStyle=color;pc.fillRect(Math.round(85-(x-27)*.65),Math.round(58+(y-52)*.65),Math.max(1,Math.round(w*.65)),Math.max(1,Math.round(h*.65)))}})();
+const p=$('preview'),pc=p.getContext('2d');pc.imageSmoothingEnabled=false;pc.fillStyle='#fff';pc.fillRect(0,0,110,140);function px(x,y,w,h,c){pc.fillStyle=c;pc.fillRect(x,y,w,h)}for(const [x,y] of [[16,30],[84,23],[22,92],[88,98]]){px(x-9,y-5,18,17,'#376547');px(x-7,y-9,14,14,'#6ca86b');px(x-3,y+11,6,8,'#8e6942')}// Detailed, left-facing turkey: layered fan feathers, rounded body, head, wattle and feet.
+(function(){pc.save();pc.translate(88,70);pc.scale(.66,.66);
+function ellipse(x,y,rx,ry,color){pc.fillStyle=color;pc.beginPath();pc.ellipse(x,y,rx,ry,0,0,Math.PI*2);pc.fill()}
+function stroke(x1,y1,x2,y2,color,width){pc.strokeStyle=color;pc.lineWidth=width;pc.lineCap='round';pc.beginPath();pc.moveTo(x1,y1);pc.lineTo(x2,y2);pc.stroke()}
+// Fan tail opens behind the body; distinct cream-tipped feathers.
+for(let i=0;i<9;i++){const a=(-1.35+i*.32),cx=10+Math.sin(a)*13,cy=-4-Math.cos(a)*16;stroke(10,5,cx,cy,'#603a28',7);stroke(10,5,cx,cy,'#a36b43',5);ellipse(cx,cy,3.3,3.3,'#e8c58a');ellipse(cx,cy+1,2.5,2.3,'#815034')}
+ellipse(6,8,15,12,'#513426');ellipse(5,6,13,10,'#825030');ellipse(3,10,9,7,'#a16b42');ellipse(9,11,7,5,'#6a402b');
+// Neck, small blue-faced head, bright beak and dangling red wattle.
+ellipse(-7,0,5,9,'#77452e');ellipse(-9,-8,6,6,'#9a633e');ellipse(-10,-9,5,4,'#92b9c4');ellipse(-12,-10,1.6,1.6,'#161e20');ellipse(-12.4,-10.5,.55,.55,'#fff');
+pc.fillStyle='#e7a447';pc.beginPath();pc.moveTo(-14,-7);pc.lineTo(-20,-5);pc.lineTo(-14,-3);pc.closePath();pc.fill();
+stroke(-15,-4,-15,2,'#c8423d',2.7);ellipse(-15,2,1.8,2.3,'#c8423d');
+for(const x of [-1,10]){stroke(x,17,x-1,22,'#dca04a',2);stroke(x-1,22,x-5,23,'#dca04a',2);stroke(x-1,22,x+2,24,'#dca04a',2)}
+pc.restore()})();
 px(50,26,12,3,'#e5b748');px(52,29,8,8,'#a9b8aa');px(55,27,2,17,'#35483d');px(51,43,10,2,'#35483d');drawPreviewDisc();pc.strokeStyle='#89958c';pc.setLineDash([2,3]);pc.beginPath();pc.moveTo(56,101);pc.lineTo(56,47);pc.stroke();
 </script></body></html>
