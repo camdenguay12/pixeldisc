@@ -164,7 +164,7 @@ function pathForShot(){
    }
   }
   const drift=smooth(t);
-  const forward=hyzer>=2?t-(hyzer===3?.23:(disc>=2?.075:.12))*Math.pow(Math.max(0,(t-.34)/.66),3):t;
+  const forward=hyzer>=2?t-(hyzer===3?.19:(disc>=2?.075:.12))*Math.pow(Math.max(0,(t-.34)/.66),3):t;
   path.push([pos[0]+Math.sin(a)*range*forward+Math.cos(a)*lateral+spreadX*drift,pos[1]-Math.cos(a)*range*forward+Math.sin(a)*lateral+spreadY*drift]);
  }
  return path
