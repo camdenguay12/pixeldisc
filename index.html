@@ -138,7 +138,7 @@ function pathForShot(){
     // +2 shares the clean late-hook trajectory of +3, but bends less.
     const bend=Math.max(0,(t-.34)/.66);
     const fadePower=Math.pow(power/100,1.15);
-    const driverBoost=hyzer===2&&disc>=2?1.12:1;
+    const driverBoost=hyzer===2&&disc>=2?1.23:1;
     const hook=(48+stability*45)*(hyzer===3?1:.62)*fadePower*driverBoost*bend*bend;
     lateral=hand*(earlyTurn*.35+hook);
    }else{
