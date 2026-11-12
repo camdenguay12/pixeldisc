@@ -137,15 +137,18 @@ function pathForShot(){
    if(hyzer>=2){
     // +2 shares the clean late-hook trajectory of +3, but bends less.
     const bend=Math.max(0,(t-.34)/.66);
-    const hook=(48+stability*45)*(hyzer===3?1:.62)*bend*bend;
+    const fadePower=Math.pow(power/100,1.15);
+    const driverBoost=hyzer===2&&disc>=2?1.12:1;
+    const hook=(48+stability*45)*(hyzer===3?1:.62)*fadePower*driverBoost*bend*bend;
     lateral=hand*(earlyTurn*.35+hook);
    }else{
-    const hyzerCurve=hyzer*stability*28*smooth((t-.07)/.93);
-    lateral=hand*(earlyTurn+lateFade+hyzerCurve);
+    const fadePower=Math.pow(power/100,1.15);
+    const hyzerCurve=hyzer*stability*28*fadePower*smooth((t-.07)/.93);
+    lateral=hand*(earlyTurn+lateFade*fadePower+hyzerCurve);
    }
   }
   const drift=smooth(t);
-  const forward=hyzer>=2?t-(hyzer===3?.23:.12)*Math.pow(Math.max(0,(t-.34)/.66),3):t;
+  const forward=hyzer>=2?t-(hyzer===3?.23:(disc>=2?.075:.12))*Math.pow(Math.max(0,(t-.34)/.66),3):t;
   path.push([pos[0]+Math.sin(a)*range*forward+Math.cos(a)*lateral+spreadX*drift,pos[1]-Math.cos(a)*range*forward+Math.sin(a)*lateral+spreadY*drift]);
  }
  return path
