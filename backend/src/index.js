@@ -1,8 +1,8 @@
 const ORIGIN='https://pixeldiscgame.com';
 const ALLOWED_ORIGINS=new Set([ORIGIN,'https://www.pixeldiscgame.com','https://camdenguay12.github.io','http://localhost:8787','http://127.0.0.1:8787']);
 const LENGTHS=[3,6,9,18];
-const LAYOUTS={random3:3,random6:6,front9:9,back9:9,full18:18};
-const PERMANENT=['front9','back9','full18'];
+const LAYOUTS={random6:6,front9:9,back9:9,timbercreek:9,full18:18};
+const PERMANENT=['front9','back9','timbercreek','full18'];
 const today=()=>new Date().toISOString().slice(0,10);
 function baseRespond(data,status=200,origin=ORIGIN){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, X-Player-Id, X-Player-Token','Vary':'Origin'}})}
 export default {async fetch(request,env){
@@ -98,7 +98,7 @@ export default {async fetch(request,env){
       ROW_NUMBER() OVER(PARTITION BY day,layout ORDER BY score,throws,created_at,id) AS daily_rank,
       ROW_NUMBER() OVER(PARTITION BY layout ORDER BY score,throws,created_at,id) AS lifetime_rank
       FROM leaderboard_scores
-    ) WHERE daily_rank>5 AND (layout NOT IN ('front9','back9','full18') OR lifetime_rank>5)
+    ) WHERE daily_rank>5 AND (layout NOT IN ('front9','back9','timbercreek','full18') OR lifetime_rank>5)
    )`).run();
    return respond({ok:true,stored:true,qualified:true})
   }
