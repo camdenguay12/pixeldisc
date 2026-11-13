@@ -491,14 +491,15 @@ function crossesBasketChains(from,to,basket){
 const gameSfx={
  chains:new Audio('/sound_chains.ogg'),
  splash:new Audio('/sound_splash.wav'),
+ woosh:new Audio('/sound_woosh.wav'),
  birds:new Audio('/sound_birds.wav')
 };
-gameSfx.chains.preload='auto';gameSfx.splash.preload='auto';gameSfx.birds.preload='auto';
+gameSfx.chains.preload='auto';gameSfx.splash.preload='auto';gameSfx.woosh.preload='auto';gameSfx.birds.preload='auto';
 gameSfx.birds.loop=true;gameSfx.birds.volume=1.0;
-gameSfx.chains.volume=0.8;gameSfx.splash.volume=0.7;
+gameSfx.chains.volume=0.8;gameSfx.splash.volume=0.7;gameSfx.woosh.volume=0.85;
 // Skip a little of the recording's lead-in so the impact aligns with the animation.
 // These offsets can be fine-tuned independently without editing the audio files.
-const gameSfxStart={chains:0,splash:0};
+const gameSfxStart={chains:0,splash:0,woosh:0};
 Object.values(gameSfx).forEach(sound=>sound.load());
 function playGameSfx(name){
  const sound=gameSfx[name];if(!sound)return;
@@ -519,7 +520,7 @@ function syncGameAmbience(){
 }
 document.addEventListener('visibilitychange',syncGameAmbience);
 let aceShown=false;
-function throwDisc(){if(animating||completed||fieldResetting||aceRunPending)return;animating=true;strokes++;$('throw').disabled=true;const shotOrigin=[...pos],path=pathForShot(),h=fieldMode?fieldHole:holes[hole];if(!fieldMode||aceRunMode){release=0;$('release').value=0;}sync();let i=0,hit=null,landing=[...pos],lastTime=0,accumulator=0,bounceMotion=null;
+function throwDisc(){if(animating||completed||fieldResetting||aceRunPending)return;playGameSfx('woosh');animating=true;strokes++;$('throw').disabled=true;const shotOrigin=[...pos],path=pathForShot(),h=fieldMode?fieldHole:holes[hole];if(!fieldMode||aceRunMode){release=0;$('release').value=0;}sync();let i=0,hit=null,landing=[...pos],lastTime=0,accumulator=0,bounceMotion=null;
 let chainsSoundQueued=false,splashSoundQueued=false;
 const soundLeadFrames=4; // 80ms at the flight's 20ms simulation step
 function upcomingFlightClear(from,to){
