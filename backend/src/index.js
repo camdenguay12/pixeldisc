@@ -3,7 +3,8 @@ const ALLOWED_ORIGINS=new Set([ORIGIN,'https://www.pixeldiscgame.com','https://c
 const LENGTHS=[3,6,9,18];
 const LAYOUTS={random6:6,front9:9,back9:9,timbercreek:9,full18:18};
 const PERMANENT=['front9','back9','timbercreek','full18'];
-const today=()=>new Date().toISOString().slice(0,10);
+// Match the daily challenge's America/New_York calendar, including DST.
+const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 function baseRespond(data,status=200,origin=ORIGIN){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, X-Player-Id, X-Player-Token','Vary':'Origin'}})}
 export default {async fetch(request,env){
  const origin=request.headers.get('Origin');const allowed=!origin||ALLOWED_ORIGINS.has(origin);
