@@ -503,6 +503,23 @@ const gameSfx={
 };
 gameSfx.chains.preload='auto';gameSfx.splash.preload='auto';gameSfx.woosh.preload='auto';gameSfx.birds.preload='auto';
 gameSfx.birds.loop=true;gameSfx.birds.volume=1.0;
+// Emphasize birdsong by 25% while attenuating low-frequency ambient hiss/rumble.
+// The browser processes the recording in real time; the source WAV stays unchanged.
+let birdAudioContext=null;
+function initBirdAudio(){
+ if(birdAudioContext)return;
+ try{
+  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContextClass)return;
+  const context=new AudioContextClass(),source=context.createMediaElementSource(gameSfx.birds);
+  const highpass=context.createBiquadFilter();highpass.type='highpass';highpass.frequency.value=420;highpass.Q.value=.7;
+  const lowShelf=context.createBiquadFilter();lowShelf.type='lowshelf';lowShelf.frequency.value=1250;lowShelf.gain.value=-4;
+  const birdGain=context.createGain();birdGain.gain.value=1.25;
+  source.connect(highpass);highpass.connect(lowShelf);lowShelf.connect(birdGain);birdGain.connect(context.destination);
+  birdAudioContext=context;
+ }catch(e){console.warn('Bird ambience filter unavailable',e)}
+}
+
 gameSfx.chains.volume=0.8;gameSfx.splash.volume=0.7;gameSfx.woosh.volume=0.85;
 // Skip a little of the recording's lead-in so the impact aligns with the animation.
 // These offsets can be fine-tuned independently without editing the audio files.
@@ -522,7 +539,7 @@ function playGameSfx(name){
 function syncGameAmbience(){
  const birds=gameSfx.birds;
  if($('game').classList.contains('active')&&!document.hidden){
-  if(birds.paused){const playing=birds.play();if(playing?.catch)playing.catch(()=>{});}
+  if(birds.paused){initBirdAudio();if(birdAudioContext?.state==='suspended')birdAudioContext.resume().catch(()=>{});const playing=birds.play();if(playing?.catch)playing.catch(()=>{});}
  }else if(!birds.paused){birds.pause();}
 }
 document.addEventListener('visibilitychange',syncGameAmbience);
