@@ -198,35 +198,28 @@ function bonusCamera(){return !fieldMode&&holes[hole]?.bonus?Math.max(0,Math.min
 // Small, hard-edged sprite adapted from the selected yellow-and-gray basket icon.
 // Compact yellow-and-gray basket sprite, with a thin black upper tray outline.
 // Load the uploaded basket art once and crop transparent padding for consistent sprite sizing.
+// Native 28×40 transparent sprite: render at 1:1 with no smoothing or cropping.
 const basketImage=new Image();
-let basketCrop=null;
+let basketReady=false;
 basketImage.onload=()=>{
- const c=document.createElement('canvas');c.width=basketImage.naturalWidth;c.height=basketImage.naturalHeight;
- const cc=c.getContext('2d',{willReadFrequently:true});cc.drawImage(basketImage,0,0);
- const pixels=cc.getImageData(0,0,c.width,c.height).data;
- let minX=c.width,minY=c.height,maxX=-1,maxY=-1;
- for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){
-  if(pixels[(y*c.width+x)*4+3]>24){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y)}
- }
- if(maxX>=minX)basketCrop={x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1};
- if(typeof draw==='function'&&typeof canvas!=='undefined')draw();
+ basketReady=true;
+ if(typeof draw==='function')draw();
  if(typeof pc!=='undefined'&&pc)drawHomeBasket();
 };
-basketImage.src='/basket2.png';
-function paintBasketImage(context,cx,cy,width){
- if(!basketCrop||!basketImage.complete)return false;
- const height=width*basketCrop.h/basketCrop.w;
- context.save();context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';
- context.drawImage(basketImage,basketCrop.x,basketCrop.y,basketCrop.w,basketCrop.h,cx-width/2,cy-height/2,width,height);
+basketImage.src='/basket_8.png';
+function paintBasketImage(context,cx,cy){
+ if(!basketReady)return false;
+ context.save();context.imageSmoothingEnabled=false;
+ context.drawImage(basketImage,Math.round(cx)-14,Math.round(cy)-20,28,40);
  context.restore();return true;
 }
 function drawHomeBasket(){
  if(typeof pc==='undefined'||!pc)return;
  pc.fillStyle='#fff';pc.fillRect(39,15,34,53);
- paintBasketImage(pc,56,40,30);
+ paintBasketImage(pc,56,40);
 }
 function drawGameBasket(x,y){
- if(paintBasketImage(ctx,x,y+5,36))return;
+ if(paintBasketImage(ctx,x,y+5))return;
  const px=(dx,dy,w,h,color)=>rect(Math.round(x+dx),Math.round(y+dy),w,h,color);
  const dark='#202020',gold='#ffca08',silver='#c6c8cb',shade='#77797d';
  // Simple stepped yellow cap, inspired by the app logo.
