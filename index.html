@@ -215,18 +215,18 @@ basketImage.onload=()=>{
 basketImage.src='/basket2.png';
 function paintBasketImage(context,cx,cy,width){
  if(!basketCrop||!basketImage.complete)return false;
- const height=Math.round(width*basketCrop.h/basketCrop.w);
- context.save();context.imageSmoothingEnabled=false;
- context.drawImage(basketImage,basketCrop.x,basketCrop.y,basketCrop.w,basketCrop.h,Math.round(cx-width/2),Math.round(cy-height/2),width,height);
+ const height=width*basketCrop.h/basketCrop.w;
+ context.save();context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';
+ context.drawImage(basketImage,basketCrop.x,basketCrop.y,basketCrop.w,basketCrop.h,cx-width/2,cy-height/2,width,height);
  context.restore();return true;
 }
 function drawHomeBasket(){
  if(typeof pc==='undefined'||!pc)return;
  pc.fillStyle='#fff';pc.fillRect(39,15,34,53);
- paintBasketImage(pc,56,40,23);
+ paintBasketImage(pc,56,40,30);
 }
 function drawGameBasket(x,y){
- if(paintBasketImage(ctx,x,y+5,28))return;
+ if(paintBasketImage(ctx,x,y+5,36))return;
  const px=(dx,dy,w,h,color)=>rect(Math.round(x+dx),Math.round(y+dy),w,h,color);
  const dark='#202020',gold='#ffca08',silver='#c6c8cb',shade='#77797d';
  // Simple stepped yellow cap, inspired by the app logo.
