@@ -229,20 +229,23 @@ body.dark-mode #game .disc-control.forehand .disc-switch button{background:#f7d3
 #profileStats .stat-record strong{white-space:nowrap}
 #home #settingsToggle span{font-size:32px!important;line-height:1!important;transform:scale(1.15)!important;transform-origin:center;filter:contrast(3)}
 /* Launch splash: full-screen and above the home UI, including installed iOS PWA. */
-#launchSplash{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#f7f8ee;opacity:1;transition:opacity .9s ease-in-out;cursor:pointer;touch-action:manipulation}
+#launchSplash{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#f7f8ee;opacity:1;transition:opacity 1.25s cubic-bezier(.45,0,.55,1);cursor:pointer;touch-action:manipulation}
 #launchSplash img{display:block;width:min(62vw,260px);height:auto;max-height:52dvh;object-fit:contain;image-rendering:pixelated;opacity:0;transform:scale(.94);animation:launchLogoIn 1.05s ease-in-out forwards}
 #launchSplash.closing{opacity:0;pointer-events:none}
-#launchSplash.closing img{animation:none;opacity:1}
+#launchSplash.closing img{animation-play-state:paused}
 @keyframes launchLogoIn{to{opacity:1;transform:scale(1)}}
+body.splash-loading>main.wrap{opacity:0;pointer-events:none}
+body>main.wrap{opacity:1;transition:opacity 1.25s cubic-bezier(.45,0,.55,1)}
 @media(prefers-reduced-motion:reduce){#launchSplash,#launchSplash img{animation:none;transition:none;opacity:1;transform:none}}
-</style></head><body><div id="launchSplash" role="button" tabindex="0" aria-label="Pixel Disc loading. Tap to continue"><img src="/pixeldisclogo512.png" alt="Pixel Disc" width="260" height="260"></div><script>
+</style></head><body class="splash-loading"><div id="launchSplash" role="button" tabindex="0" aria-label="Pixel Disc loading. Tap to continue"><img src="/pixeldisclogo512.png" alt="Pixel Disc" width="260" height="260"></div><script>
 (function(){
  const splash=document.getElementById('launchSplash');
  let closing=false;
  function dismiss(){
   if(closing)return;closing=true;
   splash.classList.add('closing');
-  window.setTimeout(()=>splash.remove(),940);
+  document.body.classList.remove('splash-loading');
+  window.setTimeout(()=>splash.remove(),1300);
  }
  const timeout=window.setTimeout(dismiss,2400);
  function skip(){window.clearTimeout(timeout);dismiss();}
