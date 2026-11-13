@@ -504,29 +504,45 @@ const gameSfx={
  birds:new Audio('/234306__sandermotions__forrest-field-spring-sounds.wav')
 };
 gameSfx.chains.preload='auto';gameSfx.splash.preload='auto';gameSfx.woosh.preload='auto';gameSfx.tree.preload='auto';gameSfx.cow.preload='auto';gameSfx.birds.preload='auto';
-gameSfx.birds.loop=true;gameSfx.birds.volume=1.0;
-// Emphasize birdsong by 25% while attenuating low-frequency ambient hiss/rumble.
-// The browser processes the recording in real time; the source WAV stays unchanged.
-let birdAudioContext=null;
+// Loop birds as Web Audio rather than an HTML media player, avoiding lock-screen playback controls.
+const birdFile='/234306__sandermotions__forrest-field-spring-sounds.wav';
+let birdAudioContext=null,birdBuffer=null,birdSource=null,birdLoading=null;
 function initBirdAudio(){
- if(birdAudioContext)return;
- try{
-  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
-  if(!AudioContextClass)return;
-  const context=new AudioContextClass(),source=context.createMediaElementSource(gameSfx.birds);
+ if(!birdAudioContext){
+  const C=window.AudioContext||window.webkitAudioContext;
+  if(!C)return null;
+  birdAudioContext=new C();
+ }
+ if(!birdLoading){
+  birdLoading=fetch(birdFile).then(r=>{if(!r.ok)throw Error('Bird recording unavailable');return r.arrayBuffer()})
+   .then(data=>birdAudioContext.decodeAudioData(data)).then(buffer=>{birdBuffer=buffer;return buffer})
+   .catch(e=>{console.warn('Bird ambience unavailable',e);return null});
+ }
+ return birdAudioContext;
+}
+function startBirdAudio(){
+ const context=initBirdAudio();if(!context)return;
+ if(context.state==='suspended')context.resume().catch(()=>{});
+ birdLoading.then(()=>{
+  if(!birdBuffer||birdSource||document.hidden||!$('game').classList.contains('active'))return;
+  const source=context.createBufferSource();source.buffer=birdBuffer;source.loop=true;
   const highpass=context.createBiquadFilter();highpass.type='highpass';highpass.frequency.value=420;highpass.Q.value=.7;
   const lowShelf=context.createBiquadFilter();lowShelf.type='lowshelf';lowShelf.frequency.value=1250;lowShelf.gain.value=-4;
-  const birdGain=context.createGain();birdGain.gain.value=1.5625;
-  source.connect(highpass);highpass.connect(lowShelf);lowShelf.connect(birdGain);birdGain.connect(context.destination);
-  birdAudioContext=context;
- }catch(e){console.warn('Bird ambience filter unavailable',e)}
+  const gain=context.createGain();gain.gain.value=1.5625;
+  source.connect(highpass);highpass.connect(lowShelf);lowShelf.connect(gain);gain.connect(context.destination);
+  source.onended=()=>{if(birdSource===source)birdSource=null};
+  birdSource=source;source.start();
+ });
+}
+function stopBirdAudio(){
+ if(birdSource){try{birdSource.stop()}catch(e){}birdSource=null}
 }
 
 gameSfx.chains.volume=0.8;gameSfx.splash.volume=0.7;gameSfx.woosh.volume=0.85;gameSfx.tree.volume=0.85;gameSfx.cow.volume=0.425;
 // Skip a little of the recording's lead-in so the impact aligns with the animation.
 // These offsets can be fine-tuned independently without editing the audio files.
 const gameSfxStart={chains:0,splash:0,woosh:0.025,tree:0,cow:0};
-Object.values(gameSfx).forEach(sound=>sound.load());
+Object.entries(gameSfx).forEach(([name,sound])=>{if(name!=='birds')sound.load()});
 function playGameSfx(name){
  const sound=gameSfx[name];if(!sound)return;
  // A fresh playback voice ensures every throw is audible, even during rapid short shots.
@@ -543,10 +559,8 @@ function playGameSfx(name){
 }
 // Background birds only while the gameplay screen is visible.
 function syncGameAmbience(){
- const birds=gameSfx.birds;
- if($('game').classList.contains('active')&&!document.hidden){
-  if(birds.paused){initBirdAudio();if(birdAudioContext?.state==='suspended')birdAudioContext.resume().catch(()=>{});const playing=birds.play();if(playing?.catch)playing.catch(()=>{});}
- }else if(!birds.paused){birds.pause();}
+ if($('game').classList.contains('active')&&!document.hidden)startBirdAudio();
+ else stopBirdAudio();
 }
 document.addEventListener('visibilitychange',syncGameAmbience);
 
