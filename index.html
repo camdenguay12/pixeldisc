@@ -274,6 +274,56 @@ const holes=[
 ];
 // Use distinct conifer sprites on selected wooded and newer bonus holes.
 for(const h of holes){if(['PINE ALLEY','CEDAR CORRIDOR','IRONWOOD CHICANE','THE FINAL TRIAL','NARROW GAP'].includes(h.name)){h.pineTrees=h.name==='PINE ALLEY'?h.trees.slice():h.name==='CEDAR CORRIDOR'?h.trees.slice(0,10):h.name==='IRONWOOD CHICANE'?h.trees.slice(0,12):h.name==='THE FINAL TRIAL'?h.trees.slice(0,8):h.trees.slice(0,4)}}
+// Keep authored hole themes, but give each layout readable separation and a deliberate route.
+// The first nine are introductory: only visual collisions are cleaned up.
+// Later holes open a staggered landing corridor while preserving hazards and mandatories.
+function tidyHoleLayout(h,index){
+ const advanced=index>=9, long=h.bonus===true;
+ const start=h.tee,end=h.basket,dy=end[1]-start[1];
+ const side=index%2===0?1:-1;
+ const targetX=(t)=>{
+  const linear=start[0]+(end[0]-start[0])*t;
+  if(!advanced)return linear;
+  // Two recognizable fairway targets on longer holes; one on standard holes.
+  const bend=long?42:34;
+  return Math.max(45,Math.min(275,linear+side*bend*Math.sin(Math.PI*t)));
+ };
+ const targets=long?[0.32,0.66]:[0.53];
+ h.landingZones=advanced?targets.map(t=>[Math.round(targetX(t)),Math.round(start[1]+dy*t)]):[];
+ const distanceToRoute=(x,y)=>{
+  const t=Math.max(0,Math.min(1,(y-start[1])/dy));
+  return Math.abs(x-targetX(t));
+ };
+ const occupied=[];
+ const near=(a,b,pad=7)=>Math.hypot(a[0]-b[0],a[1]-b[1])<a[2]+b[2]+pad;
+ const waterClear=(x,y,r)=>!(h.ponds||[]).some(([px,py,w,hh])=>
+  Math.abs(x-px)<w/2+r+5&&Math.abs(y-py)<hh/2+r+5);
+ // Water is the primary feature of water holes, and should remain intact.
+ // Remove props that collide with shorelines or visually obscure the basket/tee.
+ const clean=(items,kind)=>{
+  const kept=[];
+  for(const item of items||[]){
+   const [x,y,r]=item;
+   const visualR=kind==='tree'?r+3:kind==='cow'?r+3:r+2;
+   const shape=[x,y,visualR];
+   if(Math.hypot(x-start[0],y-start[1])<visualR+19)continue;
+   if(Math.hypot(x-end[0],y-end[1])<visualR+22)continue;
+   if(!waterClear(x,y,visualR))continue;
+   if(occupied.some(o=>near(shape,o,advanced?9:5)))continue;
+   // Keep the fairway visible without erasing the defining water hazards.
+   if(advanced&&distanceToRoute(x,y)<visualR+(long?18:20))continue;
+   if(advanced&&h.landingZones.some(p=>Math.hypot(x-p[0],y-p[1])<visualR+22))continue;
+   kept.push(item);occupied.push(shape);
+  }
+  return kept;
+ };
+ // Keep trees first (the principal shot-shaping obstacles), then smaller features.
+ h.trees=clean(h.trees,'tree');
+ h.rocks=clean(h.rocks,'rock');
+ if(h.cows)h.cows=clean(h.cows,'cow');
+ return h;
+}
+holes.forEach(tidyHoleLayout);
 const fieldHole={name:'OPEN FIELD',par:3,tee:[160,398],basket:[160,90],trees:[],rocks:[],ponds:[]};
 const fieldColors=['#e88d9c','#65a9ed','#e6bb4b','#8ecf8b','#b49be4'];
 const discs=[{name:'PUTTER',range:116,turn:0,fade:5},{name:'MIDRANGE',range:178,turn:-7,fade:9},{name:'FAIRWAY',range:247,turn:-15,fade:19},{name:'DISTANCE',range:318,turn:-24,fade:29}];
