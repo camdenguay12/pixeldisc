@@ -1,10 +1,11 @@
 
-const CACHE_NAME = "pixel-disc-v5";
+const CACHE_NAME = "pixel-disc-v6";
 
 const APP_FILES = [
   "/",
   "/index.html",
   "/manifest.webmanifest",
+  "/favicon.svg",
   "/basket_8.png",
   "/pixeldisclogo192.png",
   "/pixeldisclogo512.png"
