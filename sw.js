@@ -1,13 +1,14 @@
 
-const CACHE_NAME = "pixel-disc-v1";
+const CACHE_NAME = "pixel-disc-v2";
 
 const APP_FILES = [
   "/",
   "/index.html",
   "/manifest.webmanifest",
-  "/icon-192.png",
-  "/icon-512.png"
+  "/pixeldisclogo192.png",
+  "/pixeldisclogo512.png"
 ];
+
 
 self.addEventListener("install", event => {
   event.waitUntil(
