@@ -216,7 +216,7 @@ function paintBasketImage(context,cx,cy){
 function drawHomeBasket(){
  if(typeof pc==='undefined'||!pc)return;
  pc.fillStyle='#fff';pc.fillRect(39,15,34,53);
- paintBasketImage(pc,56,40);
+ if(basketReady){pc.save();pc.imageSmoothingEnabled=false;pc.drawImage(basketImage,56-10,40-14,20,29);pc.restore();}
 }
 function drawGameBasket(x,y){
  if(paintBasketImage(ctx,x,y+5))return;
