@@ -1,4 +1,3 @@
-
 {
   "name": "Pixel Disc",
   "short_name": "Pixel Disc",
@@ -9,6 +8,12 @@
   "background_color": "#eaf5e7",
   "theme_color": "#eaf5e7",
   "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/pixeldisclogo192.png",
       "sizes": "192x192",
