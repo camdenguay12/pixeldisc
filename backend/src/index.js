@@ -54,7 +54,7 @@ export default {async fetch(request,env){
    if(other)return respond({ok:false,error:'Username already taken. Sign in if it belongs to you.'},409);
    const prior=await env.DB.prepare('SELECT player_id FROM player_passwords WHERE player_id=?').bind(id).first();
    if(prior)return respond({ok:false,error:'This account already has a password. Sign in instead.'},409);
-   const salt=hex(crypto.getRandomValues(new Uint8Array(16))),iterations=210000,digest=await hash(salt,password,iterations);
+   const salt=hex(crypto.getRandomValues(new Uint8Array(16))),iterations=100000,digest=await hash(salt,password,iterations);
    try{await env.DB.batch([env.DB.prepare('UPDATE players SET display_name=? WHERE id=?').bind(name,id),env.DB.prepare('INSERT INTO player_passwords(player_id,salt,password_hash,iterations) VALUES(?,?,?,?)').bind(id,salt,digest,iterations)]);return respond({ok:true,name})}
    catch(e){if(/UNIQUE|constraint/i.test(String(e)))return respond({ok:false,error:'Username already registered.'},409);throw e}
   }
@@ -64,7 +64,7 @@ export default {async fetch(request,env){
    if(attempt?.blocked_until>Date.now())return respond({ok:false,error:'Too many attempts. Try again later.'},429);
    const player=await env.DB.prepare('SELECT p.id,a.salt,a.password_hash,a.iterations FROM players p JOIN player_passwords a ON a.player_id=p.id WHERE p.display_name=?').bind(name).first();
    const fallbackSalt='00000000000000000000000000000000';
-   const digest=await hash(player?.salt||fallbackSalt,password,player?.iterations||210000);
+   const digest=await hash(player?.salt||fallbackSalt,password,player?.iterations||100000);
    if(!player||digest!==player.password_hash){
     const failures=(attempt?.failures||0)+1,blocked=failures>=5?Date.now()+15*60*1000:0;
     await env.DB.prepare('INSERT INTO auth_attempts(key,failures,blocked_until) VALUES(?,?,?) ON CONFLICT(key) DO UPDATE SET failures=excluded.failures,blocked_until=excluded.blocked_until').bind(key,failures,blocked).run();
