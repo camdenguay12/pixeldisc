@@ -402,23 +402,15 @@ function paintBasketImage(context,cx,cy){
  context.drawImage(basketImage,Math.round(cx)-14,Math.round(cy)-20,28,40);
  context.restore();return true;
 }
-// Use the basket artwork from the installed app icon on the home preview, without its text.
-const homeBasketLogo=new Image();
-let homeBasketLogoReady=false;
-homeBasketLogo.onload=()=>{homeBasketLogoReady=true;if(typeof pc!=='undefined'&&pc)drawHomeBasket()};
-homeBasketLogo.src='/pixeldisc_icon2.png?v=2';
+// Home preview uses the exact same basket sprite as gameplay, at its original 28x40 display size.
 function drawHomeBasket(){
  if(typeof pc==='undefined'||!pc)return;
  pc.fillStyle='#fff';pc.fillRect(39,15,34,53);
- pc.save();pc.imageSmoothingEnabled=false;
- if(homeBasketLogoReady){
-  // Crop just the basket from the square icon; retain its original pixel-art details.
-  const w=homeBasketLogo.naturalWidth,h=homeBasketLogo.naturalHeight;
-  pc.drawImage(homeBasketLogo,w*.285,h*.17,w*.43,h*.70,43,18,26,49);
- }else if(basketReady){
-  pc.drawImage(basketImage,45,24,22,32);
+ if(basketReady){
+  pc.save();pc.imageSmoothingEnabled=false;
+  pc.drawImage(basketImage,42,21,28,40);
+  pc.restore();
  }
- pc.restore();
 }
 function drawGameBasket(x,y){
  if(paintBasketImage(ctx,x,y+5))return;
