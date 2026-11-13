@@ -1,1 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" rx="72" fill="#f7f8ee"/><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAoCAYAAADt5povAAABD0lEQVR4nGNgGO6AEZ+kgoLCf3IMffDgAU5zsUqQaxExFrPgUnx/9VPcJmlfh9BXNXEqUQyVxiqOYiG1fIZuHrJPMXyI12ckAJg56D7FGaR4AZ6gJAQwLMQV9jQFO/Yd+Y+Lr6Cg8L+4uvl/cXXzf+Q4x6cHGTBR27GEwOCw0MPJhhFXkBADduw78t/DyQZroTI4fDggFpIbrPiCE6+FtAKDy0JSg5VQcBK0kBaA7haieJ/a9SEM0KU+hAGC9SGtqyecjShKfaoYKo21ETX8UynONg2t4pK8dikRgKh2KTEaKAV4yz1sQEFB4X9wdDIDAwMDw9qlc/H2I7CB4Z9KRy0ctZBkQFY+ROaTmg/pDgDPjWPpw8jIIgAAAABJRU5ErkJggg==" x="136" y="40" width="240" height="343" style="image-rendering:pixelated"/><text x="256" y="439" text-anchor="middle" font-family="monospace" font-size="52" font-weight="900" fill="#202b27" letter-spacing="-2">PIXEL DISC</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<rect width="512" height="512" fill="#f7f8ee"/>
+<g shape-rendering="crispEdges" transform="translate(0 -4)">
+<!-- Basket cap: stepped black outline and golden top -->
+<path d="M205 92h14V78h74v14h14v14h13v27H192v-27h13z" fill="#202020"/>
+<path d="M211 99h90v13h13v14H198v-14h13z" fill="#ffca08"/>
+<path d="M252 99h12v22h-12z" fill="#f7f8ee"/>
+<!-- Vertical hanging chains -->
+<path d="M205 133h10v24h7v26h7v25h8v26h-11v-23h-9v-24h-7v-27h-5z" fill="#bfc3c6"/>
+<path d="M218 133h10v31h8v35h8v36h-10v-32h-8v-34h-8z" fill="#e0e2e1"/>
+<path d="M230 133h12v102h-12zM270 133h12v102h-12z" fill="#e4e6e4"/>
+<path d="M284 133h10v31h-8v35h-8v36h-10v-32h8v-34h8z" fill="#bfc3c6"/>
+<path d="M297 133h10v24h-7v26h-7v25h-8v26h-11v-23h9v-24h7v-27h7z" fill="#bfc3c6"/>
+<!-- Center post -->
+<path d="M244 133h24v224h-24z" fill="#202020"/>
+<path d="M250 133h12v224h-12z" fill="#858b91"/>
+<!-- Basket tray -->
+<path d="M192 232h128v18h-12v41h-104v-41h-12z" fill="#202020"/>
+<path d="M198 238h116v6H198z" fill="#ffca08"/>
+<path d="M211 250h90v22h-90zM211 279h90v5h-90z" fill="#ffca08"/>
+</g>
+<text x="256" y="418" text-anchor="middle" font-family="Georgia, 'DejaVu Serif', serif" font-weight="900" font-size="43" letter-spacing="1" fill="#202b27">PIXEL DISC</text>
+</svg>
