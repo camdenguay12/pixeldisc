@@ -197,7 +197,36 @@ ctx.restore()}
 function bonusCamera(){return !fieldMode&&holes[hole]?.bonus?Math.max(0,Math.min(245,300-pos[1])):0}
 // Small, hard-edged sprite adapted from the selected yellow-and-gray basket icon.
 // Compact yellow-and-gray basket sprite, with a thin black upper tray outline.
+// Load the uploaded basket art once and crop transparent padding for consistent sprite sizing.
+const basketImage=new Image();
+let basketCrop=null;
+basketImage.onload=()=>{
+ const c=document.createElement('canvas');c.width=basketImage.naturalWidth;c.height=basketImage.naturalHeight;
+ const cc=c.getContext('2d',{willReadFrequently:true});cc.drawImage(basketImage,0,0);
+ const pixels=cc.getImageData(0,0,c.width,c.height).data;
+ let minX=c.width,minY=c.height,maxX=-1,maxY=-1;
+ for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){
+  if(pixels[(y*c.width+x)*4+3]>24){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y)}
+ }
+ if(maxX>=minX)basketCrop={x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1};
+ if(typeof draw==='function'&&typeof canvas!=='undefined')draw();
+ if(typeof pc!=='undefined'&&pc)drawHomeBasket();
+};
+basketImage.src='/basket.png';
+function paintBasketImage(context,cx,cy,width){
+ if(!basketCrop||!basketImage.complete)return false;
+ const height=Math.round(width*basketCrop.h/basketCrop.w);
+ context.save();context.imageSmoothingEnabled=false;
+ context.drawImage(basketImage,basketCrop.x,basketCrop.y,basketCrop.w,basketCrop.h,Math.round(cx-width/2),Math.round(cy-height/2),width,height);
+ context.restore();return true;
+}
+function drawHomeBasket(){
+ if(typeof pc==='undefined'||!pc)return;
+ pc.fillStyle='#fff';pc.fillRect(39,15,34,53);
+ paintBasketImage(pc,56,40,23);
+}
 function drawGameBasket(x,y){
+ if(paintBasketImage(ctx,x,y+5,28))return;
  const px=(dx,dy,w,h,color)=>rect(Math.round(x+dx),Math.round(y+dy),w,h,color);
  const dark='#202020',gold='#ffca08',silver='#c6c8cb',shade='#77797d';
  // Simple stepped yellow cap, inspired by the app logo.
@@ -407,7 +436,7 @@ $('submitScore').onclick=async()=>{
 sendGameEvent('activity',{event:'visit',holes:0});loadPlayer();
 
 const p=$('preview'),pc=p.getContext('2d');pc.imageSmoothingEnabled=false;pc.fillStyle='#fff';pc.fillRect(0,0,110,140);function px(x,y,w,h,c){pc.fillStyle=c;pc.fillRect(x,y,w,h)}for(const [x,y] of [[16,30],[84,23],[22,92],[88,98]]){px(x-9,y-5,18,17,'#376547');px(x-7,y-9,14,14,'#6ca86b');px(x-3,y+11,6,8,'#8e6942')}
-px(50,26,12,3,'#e5b748');px(52,29,8,8,'#a9b8aa');px(55,27,2,17,'#35483d');px(51,43,10,2,'#35483d');drawPreviewDisc();pc.strokeStyle='#89958c';pc.setLineDash([2,3]);pc.beginPath();pc.moveTo(56,101);pc.lineTo(56,47);pc.stroke();
+drawHomeBasket();drawPreviewDisc();pc.strokeStyle='#89958c';pc.setLineDash([2,3]);pc.beginPath();pc.moveTo(56,101);pc.lineTo(56,47);pc.stroke();
 </script><script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
