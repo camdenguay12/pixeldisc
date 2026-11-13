@@ -506,7 +506,7 @@ gameSfx.birds.loop=true;gameSfx.birds.volume=1.0;
 gameSfx.chains.volume=0.8;gameSfx.splash.volume=0.7;gameSfx.woosh.volume=0.85;
 // Skip a little of the recording's lead-in so the impact aligns with the animation.
 // These offsets can be fine-tuned independently without editing the audio files.
-const gameSfxStart={chains:0,splash:0,woosh:0.075};
+const gameSfxStart={chains:0,splash:0,woosh:0.025};
 Object.values(gameSfx).forEach(sound=>sound.load());
 function playGameSfx(name){
  const sound=gameSfx[name];if(!sound)return;
