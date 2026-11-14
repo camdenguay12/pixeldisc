@@ -772,14 +772,14 @@ $('resetField').onclick=()=>{if(!fieldMode||aceRunMode||animating||fieldResettin
  try{
   // A public leaderboard entry needs a player display name.
   const profile=await playerRequest();
-  if(!profile.name){
+  if(!profile.player?.name){
    $('aceRunSaveStatus').textContent='SET A PLAYER NAME IN YOUR PROFILE FIRST, THEN POST YOUR SCORE.';
    button.disabled=false;button.textContent='TRY POSTING AGAIN →';
    return;
   }
   const data=await playerRequest({action:'ace_run',id:crypto.randomUUID(),aces});
   if(!data.stored)throw Error('Score was not saved');
-  $('aceRunSaveStatus').textContent='POSTED AS '+profile.name+' · SEE ACE RUN FUN ON THE DAILY LEADERBOARD!';
+  $('aceRunSaveStatus').textContent='POSTED AS '+profile.player.name+' · SEE ACE RUN FUN ON THE DAILY LEADERBOARD!';
   button.textContent='SCORE POSTED ✓';
   loadPlayer().catch(()=>{});
  }catch(e){
