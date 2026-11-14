@@ -409,7 +409,7 @@ for(const i of [9,10,11,12,13,14,15,16,17]){
  const h=holes[i],candidates=[];
  // Varied lengths and orientations make each road a different shot-shaping risk.
  for(const y of [110,155,200,245,290,335])for(const x of [48,72,96,120,144,168]){
-  for(const [dx,dy] of [[96,0],[0,88],[82,-30]]){
+  for(const [dx,dy] of [[96,0],[0,88],[82,-30],[62,0],[0,62],[62,-22]]){
    const segment=[x,y,x+dx,y+dy];
    if(!Array.from({length:17},(_,k)=>k/16).every(t=>roadClearAt([x+dx*t,y+dy*t],h)))continue;
    const mid=[x+dx/2,y+dy/2],progress=(h.tee[1]-mid[1])/(h.tee[1]-h.basket[1]);
