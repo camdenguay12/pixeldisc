@@ -384,13 +384,30 @@ function drawPixelCow(x,y,r){const k=r/16;ctx.save();ctx.translate(x,y);ctx.scal
 function lastLightRoadPath(){ctx.beginPath();ctx.moveTo(175,445);ctx.bezierCurveTo(192,400,188,370,185,347);ctx.bezierCurveTo(186,321,163,300,158,279);ctx.bezierCurveTo(151,249,157,227,158,210);ctx.bezierCurveTo(158,174,156,153,155,132);ctx.bezierCurveTo(151,94,162,51,164,-8)}
 function landedOnDirtRoad(p,h){if(!h.road||h.name!=='LAST LIGHT')return false;ctx.save();lastLightRoadPath();ctx.lineWidth=31;const onRoad=ctx.isPointInStroke(p[0],p[1]);ctx.restore();return onRoad}
 function drawMeadowFlowers(){
- // Deterministic flower beds: scenery only, never added to collision arrays.
- const petals=['#f6a8be','#f6df73','#bda3e8','#f7f4e9','#f49e77'];
- for(let i=0;i<42;i++){
-  const x=14+(i*73+hole*17)%290,y=24+(i*97+hole*29)%390;
-  const nearTree=holes[hole].trees.some(([tx,ty,r])=>Math.hypot(tx-x,ty-y)<r+9);
-  if(nearTree||Math.hypot(x-holes[hole].tee[0],y-holes[hole].tee[1])<25)continue;
-  const c=petals[i%petals.length],kind=i%4;
+ // Individually scattered flowers in unoccupied grass, with deterministic positions per hole.
+ // Pure scenery: none of these points participate in flight or landing collision logic.
+ const h=holes[hole],petals=['#f6a8be','#f6df73','#bda3e8','#f7f4e9','#f49e77'];
+ let seed=(0x9e3779b9 ^ Math.imul(hole+1,2654435761))>>>0;
+ const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+ const placed=[];
+ const clear=(x,y)=>{
+  if(x<20||x>300||y<32||y>415)return false;
+  if(Math.hypot(x-h.tee[0],y-h.tee[1])<33||Math.hypot(x-h.basket[0],y-h.basket[1])<38)return false;
+  if(h.trees.some(([tx,ty,r])=>Math.hypot(x-tx,y-ty)<r+23))return false;
+  if(h.rocks.some(([rx,ry,r])=>Math.hypot(x-rx,y-ry)<r+16))return false;
+  if((h.cows||[]).some(([cx,cy,r])=>Math.hypot(x-cx,y-cy)<r+19))return false;
+  if(h.ponds.some(([px,py,w,hh])=>Math.abs(x-px)<w/2+16&&Math.abs(y-py)<hh/2+16))return false;
+  if((h.obBlobs||[]).some(b=>Math.hypot(x-b[0],y-b[1])<Math.max(b[2],b[3])+19))return false;
+  if(h.mando&&Math.hypot(x-h.mando[0],y-h.mando[1])<45)return false;
+  if(h.road&&typeof onScenicRoad==='function'&&onScenicRoad([x,y],h))return false;
+  if(placed.some(([fx,fy])=>Math.hypot(x-fx,y-fy)<24))return false;
+  return true;
+ };
+ for(let attempt=0;attempt<360&&placed.length<31;attempt++){
+  const x=Math.round(21+rand()*278),y=Math.round(35+rand()*372);
+  if(!clear(x,y))continue;
+  placed.push([x,y]);
+  const c=petals[Math.floor(rand()*petals.length)],kind=Math.floor(rand()*4);
   rect(x,y+3,2,6,'#57975b');
   if(kind===0){rect(x-3,y,3,3,c);rect(x+3,y,3,3,c);rect(x,y-3,3,3,c);rect(x,y+3,3,3,c);rect(x,y,3,3,'#e8b747')}
   else if(kind===1){rect(x-3,y-2,9,5,c);rect(x,y-5,3,11,c);rect(x,y,3,3,'#a76e43')}
