@@ -395,14 +395,51 @@ function distanceToRoadSegment(p,segment){
  return Math.hypot(p[0]-(x1+t*dx),p[1]-(y1+t*dy));
 }
 function onMeadowRoad(p,h){return !!h.roadSegments?.some(seg=>distanceToRoadSegment(p,seg)<=13)}
+function meadowRoadWaterClear(x,y,h){
+ // Account for the full 31px road width plus shoreline margin.
+ return !h.ponds.some(([px,py,w,hh])=>{
+  const dx=(x-px)/(w/2+19),dy=(y-py)/(hh/2+19);
+  return dx*dx+dy*dy<1.15*1.15;
+ });
+}
 for(let i=9;i<18;i++){
  const h=holes[i],phase=(i-9)*.78,segments=[];
- // Winding north-to-south, visible across the entire canvas.
- const xAt=y=>160+92*Math.sin(y/105+phase)+25*Math.sin(y/47+phase*.6);
- for(let y=-20;y<460;y+=5)segments.push([xAt(y),y,xAt(y+5),y+5]);
+ const preferred=y=>160+92*Math.sin(y/105+phase)+25*Math.sin(y/47+phase*.6);
+ // Find a continuous winding path from top to bottom. Dynamic programming
+ // routes around lakes rather than drawing the road across the water.
+ const ys=[];for(let y=-24;y<=464;y+=8)ys.push(y);
+ const xs=[];for(let x=16;x<=304;x+=8)xs.push(x);
+ const rows=[],parents=[];
+ for(let k=0;k<ys.length;k++){
+  const y=ys[k],cost=[],parent=[];
+  for(let j=0;j<xs.length;j++){
+   const x=xs[j],clear=meadowRoadWaterClear(x,y,h);
+   const local=Math.pow((x-preferred(y))/32,2)+Math.pow((x-160)/190,2);
+   let best=Infinity,from=-1;
+   if(clear){
+    if(k===0)best=local;
+    else for(let p=Math.max(0,j-3);p<=Math.min(xs.length-1,j+3);p++){
+     if(!Number.isFinite(rows[k-1][p]))continue;
+     const mx=(x+xs[p])/2,my=y-4;
+     if(!meadowRoadWaterClear(mx,my,h))continue;
+     const score=rows[k-1][p]+local+Math.pow((x-xs[p])/8,2)*1.7;
+     if(score<best){best=score;from=p}
+    }
+   }
+   cost.push(best);parent.push(from);
+  }
+  rows.push(cost);parents.push(parent);
+ }
+ let idx=rows[rows.length-1].indexOf(Math.min(...rows[rows.length-1]));
+ const points=[];
+ for(let k=ys.length-1;k>=0;k--){
+  if(idx<0||!Number.isFinite(rows[k][idx]))break;
+  points.push([xs[idx],ys[k]]);idx=parents[k][idx];
+ }
+ points.reverse();
+ for(let k=1;k<points.length;k++)segments.push([...points[k-1],...points[k]]);
  h.roadSegments=segments;
- // Road goes around natural obstacles: remove or move only those in its footprint.
- // A bank of obstacles remains beside the road to demand controlled shots.
+ // Preserve challenging trees, boulders and cattle beside the road.
  const placed=[];
  const safe=(x,y,r)=>!segments.some(seg=>distanceToRoadSegment([x,y],seg)<r+21)
   &&Math.hypot(x-h.tee[0],y-h.tee[1])>r+26
@@ -555,7 +592,17 @@ function drawScenicRoad(h){
   ctx.lineWidth=31;ctx.strokeStyle='#b89465';ctx.stroke();
   ctx.lineWidth=25;ctx.strokeStyle='#cfae79';ctx.stroke();
   ctx.lineWidth=2;ctx.strokeStyle='#a07b4e';ctx.setLineDash([5,11]);ctx.stroke();
-  ctx.setLineDash([]);ctx.restore();return;
+  ctx.setLineDash([]);
+  // Brown OB markings at intervals along the dirt road, rotated with its direction.
+  ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle='#79502f';
+  for(let k=13;k<segments.length-8;k+=15){
+   const seg=segments[k],x=(seg[0]+seg[2])/2,y=(seg[1]+seg[3])/2;
+   if(y<18||y>421||x<19||x>301)continue;
+   ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(seg[3]-seg[1],seg[2]-seg[0])-Math.PI/2);
+   ctx.fillText('OB',0,0);ctx.restore();
+  }
+  ctx.restore();return;
  }
  if(!h.road)return;ctx.save();ctx.beginPath();
 if(h.bonus){ctx.moveTo(-25,365);ctx.bezierCurveTo(105,344,232,328,325,289);ctx.moveTo(-25,102);ctx.bezierCurveTo(105,85,235,47,345,24);ctx.moveTo(-25,-135);ctx.bezierCurveTo(104,-147,222,-175,345,-199)}else if(h.name==='LAST LIGHT'){
