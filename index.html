@@ -1403,6 +1403,7 @@ if ("serviceWorker" in navigator) {
 </script><script>
 (function(){
  const el=id=>document.getElementById(id),key='pixeldisc-local-editor-pin-v1',draftKey='pixeldisc-live-hole-drafts-v1';
+ const editWrap=el('course').parentElement;editWrap.style.position='relative';editWrap.append(el('onCourseEdit'),el('liveEditTools'));
  let active=false,unlocked=false,selected=null,drag=false,undo=[],original=null,dirty=false;
  const clone=x=>JSON.parse(JSON.stringify(x));
  const eligible=()=>!fieldMode&&!aceRunMode&&activeRoundLayout===null&&roundHoles.length===1&&document.getElementById('game').classList.contains('active');
