@@ -20,7 +20,7 @@ export default {async fetch(request,env){
  }
  if(request.method==='POST'&&url.pathname==='/courses/publish'){
   if(Number(request.headers.get('Content-Length')||0)>30000)return respond({ok:false,error:'Course payload too large'},413);
-  if(!/^\\d{4}$/.test(String(env.EDITOR_PIN||'')))return respond({ok:false,error:'Editor PIN not configured on server'},503);
+  if(!/^\d{4}$/.test(String(env.EDITOR_PIN||'')))return respond({ok:false,error:'Editor PIN not configured on server'},503);
   const rawIp=request.headers.get('CF-Connecting-IP')||'unknown';
   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(rawIp));
   const clientId=Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,'0')).join('');
