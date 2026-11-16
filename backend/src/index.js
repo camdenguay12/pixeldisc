@@ -38,7 +38,7 @@ export default {async fetch(request,env){
   const validPoint=p=>Array.isArray(p)&&p.length===2&&p[0]>=0&&p[0]<=320&&p[1]>=0&&p[1]<=440&&p.every(Number.isFinite);
   const validList=(arr,kind)=>Array.isArray(arr)&&arr.length<=150&&arr.every(o=>{
    if(!Array.isArray(o)||o[0]<0||o[0]>320||o[1]<0||o[1]>440||!Number.isFinite(o[0])||!Number.isFinite(o[1]))return false;
-   if(kind==='trees')return (o.length===3||o.length===4)&&Number.isFinite(o[2])&&o[2]>=3&&o[2]<=100&&(o.length===3||(Number.isInteger(o[3])&&o[3]>=0&&o[3]<=7));
+   if(kind==='trees')return (o.length===3||o.length===4)&&Number.isFinite(o[2])&&o[2]>=3&&o[2]<=100&&(o.length===3||(Number.isInteger(o[3])&&o[3]>=0&&o[3]<=11));
    return o.length===(kind==='ponds'?4:3)&&o.slice(2).every(n=>Number.isFinite(n)&&n>=3&&n<=300);
   });
   const validMando=m=>m===undefined||(Array.isArray(m)&&m.length===3&&m[0]>=0&&m[0]<=320&&m[1]>=0&&m[1]<=440&&Number.isFinite(m[0])&&Number.isFinite(m[1])&&['left','right'].includes(m[2]));
