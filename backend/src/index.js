@@ -35,9 +35,14 @@ export default {async fetch(request,env){
    return respond({ok:false,error:'Invalid PIN'},403);
   }
   const id=data.id,layout=data.layout;
-  const validPoint=p=>Array.isArray(p)&&p.length===2&&p.every(n=>Number.isFinite(n)&&n>=0&&n<=440);
-  const validList=(arr,kind)=>Array.isArray(arr)&&arr.length<=150&&arr.every(o=>Array.isArray(o)&&o.length===(kind==='ponds'?4:3)&&o.every(n=>Number.isFinite(n))&&o[0]>=0&&o[0]<=320&&o[1]>=0&&o[1]<=440&&o.slice(2).every(n=>n>=3&&n<=300));
-  if(!Number.isInteger(id)||id<0||id>35||!layout||typeof layout!=='object'||Array.isArray(layout)||!validPoint(layout.tee)||!validPoint(layout.basket)||!validList(layout.trees,'trees')||!validList(layout.rocks,'rocks')||!validList(layout.ponds,'ponds')||!Number.isInteger(layout.par)||layout.par<2||layout.par>6||typeof layout.name!=='string'||layout.name.length>80)return respond({ok:false,error:'Invalid hole layout'},400);
+  const validPoint=p=>Array.isArray(p)&&p.length===2&&p[0]>=0&&p[0]<=320&&p[1]>=0&&p[1]<=440&&p.every(Number.isFinite);
+  const validList=(arr,kind)=>Array.isArray(arr)&&arr.length<=150&&arr.every(o=>{
+   if(!Array.isArray(o)||o[0]<0||o[0]>320||o[1]<0||o[1]>440||!Number.isFinite(o[0])||!Number.isFinite(o[1]))return false;
+   if(kind==='trees')return (o.length===3||o.length===4)&&Number.isFinite(o[2])&&o[2]>=3&&o[2]<=100&&(o.length===3||(Number.isInteger(o[3])&&o[3]>=0&&o[3]<=7));
+   return o.length===(kind==='ponds'?4:3)&&o.slice(2).every(n=>Number.isFinite(n)&&n>=3&&n<=300);
+  });
+  const validMando=m=>m===undefined||(Array.isArray(m)&&m.length===3&&m[0]>=0&&m[0]<=320&&m[1]>=0&&m[1]<=440&&Number.isFinite(m[0])&&Number.isFinite(m[1])&&['left','right'].includes(m[2]));
+  if(!Number.isInteger(id)||id<0||id>35||!layout||typeof layout!=='object'||Array.isArray(layout)||!validPoint(layout.tee)||!validPoint(layout.basket)||!validList(layout.trees,'trees')||!validList(layout.rocks,'rocks')||!validList(layout.ponds,'ponds')||!validList(layout.cows||[],'cows')||!validList(layout.fences||[],'fences')||!validList(layout.largeRocks||[],'largeRocks')||!validMando(layout.mando)||!Number.isInteger(layout.par)||layout.par<2||layout.par>6||typeof layout.name!=='string'||layout.name.length>80)return respond({ok:false,error:'Invalid hole layout'},400);
   const json=JSON.stringify(layout);
   if(json.length>24000)return respond({ok:false,error:'Layout too large'},413);
   await env.DB.prepare('INSERT INTO published_holes(hole_id,layout,version) VALUES(?,?,1) ON CONFLICT(hole_id) DO UPDATE SET layout=excluded.layout,version=published_holes.version+1,updated_at=strftime(\'%Y-%m-%dT%H:%M:%fZ\',\'now\')').bind(id,json).run();
