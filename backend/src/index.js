@@ -1,5 +1,5 @@
 const ORIGIN='https://pixeldiscgame.com';
-const ALLOWED_ORIGINS=new Set([ORIGIN,'https://www.pixeldiscgame.com','https://camdenguay12.github.io','http://localhost:8787','http://127.0.0.1:8787']);
+const ALLOWED_ORIGINS=new Set([ORIGIN,'https://www.pixeldiscgame.com','https://pixeldisc.com','https://www.pixeldisc.com','https://camdenguay12.github.io','http://localhost:8787','http://127.0.0.1:8787']);
 const LENGTHS=[3,6,9,18];
 const LAYOUTS={random6:6,front9:9,back9:9,timbercreek:9,full18:18};
 const PERMANENT=['front9','back9','timbercreek','full18'];
@@ -14,6 +14,36 @@ export default {async fetch(request,env){
  if(!env.DB)return respond({ok:false,error:'D1 binding DB is missing'},503);
  try{
  const url=new URL(request.url),day=today();
+ if(request.method==='GET'&&url.pathname==='/courses'){
+  const {results}=await env.DB.prepare('SELECT hole_id,layout,version FROM published_holes ORDER BY hole_id').all();
+  return respond({ok:true,holes:results.map(r=>({id:r.hole_id,layout:JSON.parse(r.layout),version:r.version}))});
+ }
+ if(request.method==='POST'&&url.pathname==='/courses/publish'){
+  if(Number(request.headers.get('Content-Length')||0)>30000)return respond({ok:false,error:'Course payload too large'},413);
+  if(!/^\\d{4}$/.test(String(env.EDITOR_PIN||'')))return respond({ok:false,error:'Editor PIN not configured on server'},503);
+  const rawIp=request.headers.get('CF-Connecting-IP')||'unknown';
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(rawIp));
+  const clientId=Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,'0')).join('');
+  const now=Date.now();
+  const attempts=await env.DB.prepare('SELECT failures,blocked_until FROM editor_attempts WHERE client_id=?').bind(clientId).first();
+  if(attempts&&attempts.blocked_until>now)return respond({ok:false,error:'Too many attempts. Try again later.'},429);
+  let data;try{data=await request.json()}catch{return respond({ok:false,error:'Invalid JSON'},400)}
+  const pin=String(data.pin||'');
+  if(pin!==String(env.EDITOR_PIN)){
+   const failures=(attempts?.failures||0)+1;
+   await env.DB.prepare('INSERT INTO editor_attempts(client_id,failures,blocked_until) VALUES(?,?,?) ON CONFLICT(client_id) DO UPDATE SET failures=excluded.failures,blocked_until=excluded.blocked_until').bind(clientId,failures,failures>=5?now+3600000:0).run();
+   return respond({ok:false,error:'Invalid PIN'},403);
+  }
+  const id=data.id,layout=data.layout;
+  const validPoint=p=>Array.isArray(p)&&p.length===2&&p.every(n=>Number.isFinite(n)&&n>=0&&n<=440);
+  const validList=(arr,kind)=>Array.isArray(arr)&&arr.length<=150&&arr.every(o=>Array.isArray(o)&&o.length===(kind==='ponds'?4:3)&&o.every(n=>Number.isFinite(n))&&o[0]>=0&&o[0]<=320&&o[1]>=0&&o[1]<=440&&o.slice(2).every(n=>n>=3&&n<=300));
+  if(!Number.isInteger(id)||id<0||id>35||!layout||typeof layout!=='object'||Array.isArray(layout)||!validPoint(layout.tee)||!validPoint(layout.basket)||!validList(layout.trees,'trees')||!validList(layout.rocks,'rocks')||!validList(layout.ponds,'ponds')||!Number.isInteger(layout.par)||layout.par<2||layout.par>6||typeof layout.name!=='string'||layout.name.length>80)return respond({ok:false,error:'Invalid hole layout'},400);
+  const json=JSON.stringify(layout);
+  if(json.length>24000)return respond({ok:false,error:'Layout too large'},413);
+  await env.DB.prepare('INSERT INTO published_holes(hole_id,layout,version) VALUES(?,?,1) ON CONFLICT(hole_id) DO UPDATE SET layout=excluded.layout,version=published_holes.version+1,updated_at=strftime(\'%Y-%m-%dT%H:%M:%fZ\',\'now\')').bind(id,json).run();
+  await env.DB.prepare('DELETE FROM editor_attempts WHERE client_id=?').bind(clientId).run();
+  return respond({ok:true,published:true,id});
+ }
  if(request.method==='GET'&&url.pathname==='/health'){await env.DB.prepare('SELECT 1').first();return respond({ok:true,service:'pixeldisc',date:day})}
  if(request.method==='GET'&&url.pathname==='/leaderboard'){
   const daily={},allTime={};
