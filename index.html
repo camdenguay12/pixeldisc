@@ -292,6 +292,17 @@ body>main.wrap{opacity:1;transition:opacity 1.25s cubic-bezier(.45,0,.55,1)}
 @media(max-height:730px){#home .home-action-card{height:76px}}
 
 #home .preview{display:block!important;width:min(100%,330px)!important;height:auto!important;max-height:none!important;aspect-ratio:220/92!important;object-fit:contain!important;image-rendering:pixelated;margin:3px auto!important}
+
+/* Override legacy side-by-side home controls, including saved-round selectors. */
+#home .home-main-actions .round-start{display:flex!important;flex-direction:column!important;grid-template-columns:none!important;align-items:stretch!important;width:100%!important;max-width:none!important;gap:8px!important}
+#home .home-main-actions .round-start:not(:has(.saved-round-bubble:not(.hidden)))>#start,
+#home .home-main-actions .round-start:not(:has(.saved-round-bubble:not(.hidden)))>.round-length,
+#home .home-main-actions .round-start>#start,
+#home .home-main-actions .round-start>#roundMenu{display:block!important;flex:0 0 auto!important;grid-column:auto!important;width:100%!important;max-width:none!important;min-width:0!important;align-self:stretch!important;box-sizing:border-box!important;height:48px!important;min-height:48px!important}
+#home .home-main-actions .round-start #roundTrigger{width:100%!important;height:48px!important;box-sizing:border-box!important}
+#home .home-action-grid .home-action-card{height:78px!important;min-height:0!important}
+@media(max-height:730px){#home .home-action-grid .home-action-card{height:68px!important}}
+#home .hero #preview{width:min(100%,400px)!important;max-width:400px!important;height:auto!important;max-height:none!important;aspect-ratio:280/110!important;object-fit:contain!important;image-rendering:pixelated}
 </style><style id="editor-readability-fix">#liveEditTools{max-height:min(80dvh,590px)!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;line-height:1.45!important}#liveEditTools select,#liveEditTools button{min-height:30px!important;line-height:1.25!important;white-space:normal!important}#liveEditTools #liveEditStatus{display:block!important;position:static!important;line-height:1.5!important;white-space:normal!important;overflow-wrap:anywhere!important;margin-top:8px!important;padding:6px!important;background:#f0f6e9!important;color:#213b2c!important}#game #message{position:relative!important;line-height:1.45!important;min-height:1.5em!important;white-space:normal!important;overflow-wrap:break-word!important}#course.editing{touch-action:none!important}</style></head><body class="splash-loading"><script>try{const saved=JSON.parse(localStorage.getItem("pixeldisc-personal-settings-v1")||"{}");if(saved.darkMode===true||(saved.darkMode==null&&localStorage.getItem("pixeldisc-dark-mode")==="on"))document.body.classList.add("splash-dark")}catch(e){if(localStorage.getItem("pixeldisc-dark-mode")==="on")document.body.classList.add("splash-dark")}</script><div id="launchSplash" role="button" tabindex="0" aria-label="Pixel Disc loading. Tap to continue"><img src="/pixeldisc_icon2.png?v=2" alt="Pixel Disc" width="260" height="260"></div><script>
 (function(){
  const splash=document.getElementById('launchSplash');
@@ -308,7 +319,7 @@ body>main.wrap{opacity:1;transition:opacity 1.25s cubic-bezier(.45,0,.55,1)}
  splash.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();skip();}});
 })();
 </script><main class="wrap">
-<section id="home" class="screen active"><div class="hero"><h1>PIXEL DISC</h1><div class="muted home-subtitle">A TINY DISC GOLF EXPERIENCE</div><canvas id="preview" class="preview" width="220" height="92"></canvas><div class="home-disc-hint" id="discColorHint">TAP DISC TO CHANGE COLOR</div></div>
+<section id="home" class="screen active"><div class="hero"><h1>PIXEL DISC</h1><div class="muted home-subtitle">A TINY DISC GOLF EXPERIENCE</div><canvas id="preview" class="preview" width="280" height="110"></canvas><div class="home-disc-hint" id="discColorHint">TAP DISC TO CHANGE COLOR</div></div>
 <div class="home-main-actions">
 <div class="round-start"><div id="savedRoundBubble" class="saved-round-bubble hidden"><button id="resumeRound" type="button">▶ RESUME ROUND</button><button id="dismissSavedRound" type="button" aria-label="Delete saved round" title="Delete saved round">×</button></div><button class="primary" id="start">START ROUND ▶</button><div class="pixel-dropdown round-length" id="roundMenu"><button type="button" class="pixel-dropdown-trigger" id="roundTrigger" aria-expanded="false">DAILY CHALLENGE ▾</button><div class="pixel-dropdown-options hidden" id="roundOptions"><button type="button" data-round="random6">DAILY CHALLENGE 🎯</button><button type="button" data-round="front9">PINEWATER PARK 🌲</button><button type="button" data-round="back9">MEADOW ROAD 🌼</button><button type="button" data-round="timbercreek">TIMBER CREEK 🌳</button><button type="button" data-round="desert9">SUNSET DUNES 🌵</button></div></div></div>
 <div class="home-action-grid"><button id="exploreCourses" type="button" class="home-action-card">🌲<span>EXPLORE COURSES</span></button><button id="leaderboardToggle" type="button" class="home-action-card" aria-expanded="false">🏆<span>LEADERBOARDS</span></button><button id="courseToggle" type="button" class="home-action-card" aria-expanded="false">🎯<span>GAME MODES</span></button><button id="playerProfile" type="button" class="home-action-card">👤<span>MY PROFILE</span></button></div>
@@ -833,13 +844,17 @@ function paintBasketImage(context,cx,cy){
 function drawHomeBasket(){
  if(typeof pc==='undefined'||!pc)return;
  pc.imageSmoothingEnabled=false;
- pc.clearRect(0,0,220,92);
- // Original pine artwork, rendered at its natural proportions rather than stretched.
+ pc.clearRect(0,0,280,110);
+ // Original tree sprites maintain their native aspect ratio.
  if(typeof pixelTreeCache!=='undefined'){
-  pc.drawImage(pixelTreeCache[8],4,9,65,72);
-  pc.drawImage(pixelTreeCache[9],155,5,61,77);
+  pc.drawImage(pixelTreeCache[8],3,8,81,90);
+  pc.drawImage(pixelTreeCache[9],202,4,74,94);
  }
- if(basketReady)pc.drawImage(basketImage,109,29,28,40);
+ if(basketReady)pc.drawImage(basketImage,155,33,39,56);
+ // An arcing dotted flight line from the disc toward the basket.
+ pc.save();pc.fillStyle='#87988c';
+ for(let t=.12;t<.96;t+=.095){const x=103+(155-103)*t,y=57-19*Math.sin(Math.PI*t)+5*t;pc.fillRect(Math.round(x),Math.round(y),3,3)}
+ pc.restore();
  drawPreviewDisc();
 }
 function drawGameBasket(x,y){
@@ -1249,13 +1264,17 @@ function startAceRun(){aceRunSequence++;$('throw').disabled=false;aceRunAceFlash
 const modeHelp={field:{title:'OPEN FIELD',lines:['THROW AS MANY DISCS AS YOU WANT — THERE IS NO SCORE OR TIME LIMIT.','AIM, ADJUST POWER, DISC, AND HYZER / ANHYZER TO PRACTICE DIFFERENT FLIGHTS.','DRAG THE BASKET TO ANY SPOT ON THE COURSE TO CREATE YOUR OWN TARGET.','YOUR THROWN DISCS STAY WHERE THEY LAND. USE RESET DISCS IN THE BOTTOM CORNER TO SEND THEM ALL BACK TO THE TEE.']},ace:{title:'ACE RUN FUN',lines:['YOU GET 10 THROWS AT 10 DIFFERENT BASKET POSITIONS.','AIM, CHOOSE YOUR DISC AND POWER, THEN TRY TO HIT THE BASKET IN ONE THROW.','EACH ACE COUNTS AS ONE POINT. THE TARGET MOVES AFTER A SHORT PAUSE.','SHARE YOUR FINAL SCORE, COMPETE ON THE DAILY LEADERBOARD, AND BEAT YOUR PERSONAL BEST.']}};let pendingMode=null;function showModeInstructions(mode){pendingMode=mode;const help=modeHelp[mode];$('modeInstructionsTitle').textContent=help.title;$('modeInstructionsBody').innerHTML=help.lines.map((line,i)=>'<p><strong>'+String(i+1).padStart(2,'0')+'</strong> '+line+'</p>').join('');$('practiceOverlay').classList.add('hidden');$('modeInstructions').classList.remove('hidden')}function hideModeInstructions(){pendingMode=null;$('modeInstructions').classList.add('hidden');$('practiceOverlay').classList.remove('hidden')}$('modeInstructionsBack').onclick=hideModeInstructions;$('modeInstructionsPlay').onclick=()=>{const mode=pendingMode;pendingMode=null;$('modeInstructions').classList.add('hidden');if(mode==='ace')startAceRun();else if(mode==='field')startOpenField()};$('aceRunPractice').onclick=()=>showModeInstructions('ace');$('aceRunAgain').onclick=startAceRun;$('aceRunHome').onclick=()=>{aceRunSequence++;aceRunPending=false;aceRunAceFlash=false;$('aceRunOverlay').classList.add('hidden');screen('home')};
 function startOpenField(){aceRunSequence++;aceRunAceFlash=false;aceRunPending=false;fieldResetting=false;aceRunMode=false;fieldHole.basket=[160,90];fieldMode=true;fieldDiscs=[];lastFieldDistance=null;hole=0;roundHoles=[0];results=[];loadHole();$('message').textContent='OPEN FIELD · THROW AS MANY DISCS AS YOU LIKE';screen('game');$('closePractice').click()}$('fieldPractice').onclick=()=>showModeInstructions('field');const homeDiscColors=['#e88d9c','#65a9ed','#e6bb4b','#8ecf8b','#b49be4','#f28b42','#e04d4d','#42c7c7','#f4f0e6','#252c38','#ed74c8','#a6d74e','#88684b'];function cycleHomeDiscColor(){const current=homeDiscColors.indexOf(discColor);discColor=homeDiscColors[(current+1)%homeDiscColors.length];savePersonalSettings();drawPreviewDisc()}$('preview').addEventListener('click',cycleHomeDiscColor);$('preview').setAttribute('role','button');$('preview').setAttribute('tabindex','0');$('preview').setAttribute('aria-label','Tap disc to change color');$('preview').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();cycleHomeDiscColor()}});$('discColorHint').onclick=cycleHomeDiscColor;function drawPreviewDisc(){
  pc.imageSmoothingEnabled=false;
- // Disc sits to the left of the basket, with a clear gap between the sprites.
- pc.clearRect(78,34,27,26);
- const cx=90,cy=49;
- pc.fillStyle='#333';
- for(let y=-5;y<=5;y++){const widths=[3,5,7,8,9,10,9,8,7,5,3],half=widths[y+5];pc.fillRect(cx-half,cy+y,half*2+1,1)}
- pc.fillStyle=discColor;
- for(let y=-4;y<=4;y++){const widths=[3,5,6,8,9,8,6,5,3],half=widths[y+4];pc.fillRect(cx-half,cy+y,half*2+1,1)}
+ pc.clearRect(87,41,31,32);
+ const cx=102,cy=60;
+ // Circular pixel silhouette with the original dark outline.
+ for(let y=-12;y<=12;y++){
+  const half=Math.floor(Math.sqrt(12*12-y*y));
+  pc.fillStyle='#333';pc.fillRect(cx-half,cy+y,half*2+1,1);
+ }
+ for(let y=-10;y<=10;y++){
+  const half=Math.floor(Math.sqrt(10*10-y*y));
+  pc.fillStyle=discColor;pc.fillRect(cx-half,cy+y,half*2+1,1);
+ }
 }$('start').onclick=()=>{if(savedRound){$('startRoundOverlay').classList.remove('hidden');return}begin()};$('again').onclick=()=>begin(activeRoundLayout===null?[...roundHoles]:null);$('finishHome').onclick=()=>screen('home');$('shareResults').onclick=shareResults;$('homeBtn').onclick=()=>{$('leaveOverlay').classList.remove('hidden');$('stayRound').focus()};$('backBtn').onclick=()=>{if(animating)return;if(!fieldMode&&activeRoundLayout===null&&roundHoles.length===1){$('practiceOverlay').classList.add('hidden');$('practiceHolesOverlay').classList.remove('hidden');return}$('leaveOverlay').classList.remove('hidden');$('stayRound').focus()};$('stayRound').onclick=()=>$('leaveOverlay').classList.add('hidden');$('confirmLeave').onclick=()=>{aceRunSequence++;aceRunPending=false;aceRunAceFlash=false;$('leaveOverlay').classList.add('hidden');if(!fieldMode)persistRound();screen('home')};$('leaveOverlay').addEventListener('click',e=>{if(e.target===$('leaveOverlay'))$('stayRound').click()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('leaveOverlay').classList.contains('hidden'))$('stayRound').click()});$('holeOverlay').addEventListener('click',e=>{if(e.target===$('holeOverlay'))$('holeOverlay').classList.add('hidden')});
 function advanceHole(){if((holes[hole]?.longHole||holes[hole]?.bonus)&&roundHoles.length===1&&activeRoundLayout===null){$('holeOverlay').classList.add('hidden');begin([hole]);return}if(!fieldMode)sendGameEvent('activity',{event:'hole_complete',holes:roundHoles.length});$('holeOverlay').classList.add('hidden');if(!fieldMode&&activeRoundLayout===null&&roundHoles.length===1){hole=(hole+1)%holes.length;roundHoles=[hole];roundIndex=0;results=[];loadHole();maybeShowMeadowRoadWelcome();$('message').textContent='PRACTICE · '+holes[hole].name+' · READY TO THROW';draw();return}if(roundIndex===roundHoles.length-1)finish();else{roundIndex++;hole=roundHoles[roundIndex];loadHole();maybeShowMeadowRoadWelcome();persistRound()}}$('next').onclick=advanceHole;$('popupNext').onclick=advanceHole;$('throw').onclick=throwDisc;$('throwStyle').onclick=()=>{if(animating||completed)return;forehand=!forehand;updateThrowStyleButton();$('throwStyle').classList.toggle('forehand',forehand);document.querySelector('#game .disc-control').classList.toggle('forehand',forehand);draw()};$('prevDisc').onclick=()=>{disc=(disc+discs.length-1)%discs.length;sync();draw()};$('nextDisc').onclick=()=>{disc=(disc+1)%discs.length;sync();draw()};function updatePowerFill(){const el=$('power');const min=Number(el.min||0),max=Number(el.max||100);el.style.setProperty('--power-fill',((Number(el.value)-min)/(max-min)*100)+'%')}$('power').oninput=e=>{power=+e.target.value;updatePowerFill();sync();draw()};$('release').oninput=e=>{release=-(+e.target.value);sync();draw()};$('angle').oninput=e=>{angle=+e.target.value;sync();draw()};let draggingFieldBasket=false;
 function fieldCanvasPoint(e){const r=canvas.getBoundingClientRect();return [(e.clientX-r.left)*320/r.width,(e.clientY-r.top)*440/r.height-bonusCamera()]}
