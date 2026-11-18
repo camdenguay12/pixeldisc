@@ -533,6 +533,17 @@ body.splash-loading>main.wrap{opacity:0!important;pointer-events:none!important}
  #game.active>#message{grid-column:1!important;grid-row:5!important;align-self:center!important;text-align:center!important;font-size:12px!important}
  #game.active>.hint{display:none!important}
 }
+
+/* Desktop-only balanced horizontal spacing and uniform darker gray controls. */
+@media (min-width:1100px) and (min-height:650px) and (orientation:landscape) and (pointer:fine){
+ .wrap:has(#game.active){max-width:1320px!important;width:100%!important;margin-inline:auto!important;padding-inline:clamp(16px,2vw,30px)!important;box-sizing:border-box!important}
+ #game.active{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr)!important;column-gap:clamp(16px,2vw,28px)!important}
+ #game.active>.course-wrap{justify-content:center!important}
+ #game.active>.course-wrap>#course{margin-inline:auto!important}
+ #game.active>#course{justify-self:center!important;margin-inline:auto!important}
+ #game.active>.controls>.panel{background:#d9dedc!important}
+ #game.active>.controls>.slider-panel{background:#d9dedc!important}
+}
 </style></head><body class="splash-loading"><script>try{if(sessionStorage.getItem("pixeldisc-skip-splash-once")==="1"){sessionStorage.removeItem("pixeldisc-skip-splash-once");document.body.classList.remove("splash-loading");window.pixelDiscSkipSplash=true}}catch(e){};try{const saved=JSON.parse(localStorage.getItem("pixeldisc-personal-settings-v1")||"{}");if(saved.darkMode===true||(saved.darkMode==null&&localStorage.getItem("pixeldisc-dark-mode")==="on"))document.body.classList.add("splash-dark")}catch(e){if(localStorage.getItem("pixeldisc-dark-mode")==="on")document.body.classList.add("splash-dark")}</script><div id="launchSplash" role="button" tabindex="0" aria-label="Pixel Disc loading. Tap to continue"><img src="/pixeldisc_icon2.png?v=2" alt="Pixel Disc" width="260" height="260"></div><script>
 (function(){
  const splash=document.getElementById('launchSplash');
