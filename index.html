@@ -454,8 +454,8 @@ body:not(.dark-mode):has(#home.active)::before{content:"";position:fixed;inset:0
 #practiceHolesOverlay .practice-course-label .course-pixel-icon{width:24px;height:24px;flex:0 0 24px;margin:0;image-rendering:pixelated}
 #practiceHolesOverlay details.practice-course-group summary{display:flex;align-items:center;justify-content:space-between;gap:8px}
 
-/* Mobile-only: lighter option panels and more readable throw controls. */
-@media (max-width: 767px) {
+/* Desktop-only: lighter option panels and more readable throw controls. */
+@media (min-width: 1100px) and (min-height: 650px) and (orientation: landscape) and (pointer: fine) {
   #game.active > .controls > .panel,
   #game.active > .controls > .slider-panel {
     background: #edf0ef !important;
