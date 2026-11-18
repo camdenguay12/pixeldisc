@@ -169,7 +169,7 @@ body.dark-mode #game .disc-control.forehand .disc-switch button{background:#f7d3
 #home .round-start:not(:has(.saved-round-bubble:not(.hidden))) .round-length{flex:0 0 48%!important;width:48%!important;min-width:0!important}
 
 /* Unified home action heights and larger readable labels. */
-#home .round-start:not(:has(.saved-round-bubble:not(.hidden))) #start{flex:0 0 43%!important;width:43%!important;height:50px!important;min-height:50px!important;font-size:clamp(11px,2.8vw,14px)!important;line-height:1.15!important}
+#home .round-start:not(:has(.saved-round-bubble:not(.hidden))) #start{flex:0 0 43%!important;width:43%!important;height:50px!important;min-height:50px!important}
 #home .round-start:not(:has(.saved-round-bubble:not(.hidden))) .round-length{flex:1 1 57%!important;width:auto!important;height:50px!important;min-height:50px!important}
 #home .round-start:not(:has(.saved-round-bubble:not(.hidden))) .round-length .pixel-dropdown-trigger{height:50px!important;min-height:50px!important;font-size:clamp(11px,2.7vw,14px)!important;line-height:1.15!important}
 #home .round-start:has(.saved-round-bubble:not(.hidden)) .round-length .pixel-dropdown-trigger{font-size:clamp(10px,2.55vw,13px)!important}
@@ -442,6 +442,9 @@ body:not(.dark-mode):has(#home.active)::before{content:"";position:fixed;inset:0
 #settingsOverlay #settingsPanel .pixel-dropdown-options button{font-size:clamp(13px,3.4vw,16px)!important}
 #home .home-main-actions .round-start #start{font-size:clamp(21px,5.6vw,27px)!important}
 #home .home-main-actions .round-start #resumeRound{font-size:clamp(21px,5.6vw,27px)!important}
+
+/* Same font size for both round actions, including the no-saved-round state. */
+#home .home-main-actions .round-start #start,#home .home-main-actions .round-start #resumeRound{font-size:clamp(24px,6.5vw,32px)!important;line-height:1.2!important;font-weight:900!important}
 </style><style id="editor-readability-fix">#liveEditTools{max-height:min(80dvh,590px)!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;line-height:1.45!important}#liveEditTools select,#liveEditTools button{min-height:30px!important;line-height:1.25!important;white-space:normal!important}#liveEditTools #liveEditStatus{display:block!important;position:static!important;line-height:1.5!important;white-space:normal!important;overflow-wrap:anywhere!important;margin-top:8px!important;padding:6px!important;background:#f0f6e9!important;color:#213b2c!important}#game #message{position:relative!important;line-height:1.45!important;min-height:1.5em!important;white-space:normal!important;overflow-wrap:break-word!important}#course.editing{touch-action:none!important}</style><style id="final-menu-polish">
 /* Final overrides placed after legacy style blocks. */
 #home .home-main-actions .round-start button#start,
