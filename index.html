@@ -351,6 +351,62 @@ body:not(.dark-mode):has(#home.active)::before{content:"";position:fixed;inset:0
 
 /* Both primary round actions use exactly the same text size. */
 #home .home-main-actions .round-start #start,#home .home-main-actions .round-start #resumeRound{font-size:clamp(19px,5vw,24px)!important;font-weight:900!important;letter-spacing:.25px!important;line-height:1.2!important}
+
+/* Unified menus based on Practice > Choose a Hole: forest-green sections,
+   clean white selections, consistent borders, spacing, and modal headers. */
+:is(#practiceOverlay,#leaderboardOverlay,#profileOverlay,#settingsOverlay) .hole-popup,
+#settingsOverlay #settingsPanel{
+ background:#fff!important;color:#22392b!important;border:3px solid #294b35!important;
+ border-radius:8px!important;box-shadow:5px 5px 0 #294b35!important;
+ padding:18px!important;box-sizing:border-box!important;
+ width:min(440px,calc(100vw - 28px))!important;max-width:100%!important;
+ max-height:calc(100dvh - 32px)!important;overflow-y:auto!important;
+}
+:is(#practiceOverlay,#leaderboardOverlay,#profileOverlay,#settingsOverlay) :is(.leaderboard-popup-header,.profile-nav-header){
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:10px!important;background:#d9ead7!important;border:2px solid #294b35!important;
+ padding:10px!important;margin:0 0 14px!important;border-radius:4px!important;
+}
+:is(#leaderboardOverlay,#profileOverlay) .leaderboard-popup-header h2{
+ color:#23452f!important;font-size:clamp(15px,4vw,19px)!important;text-align:left!important;margin:0!important;
+}
+#settingsOverlay #settingsPanel>strong{
+ display:block!important;background:#d9ead7!important;border:2px solid #294b35!important;
+ border-radius:4px!important;padding:12px 54px 12px 12px!important;
+ color:#23452f!important;font-size:18px!important;margin:0 0 16px!important;
+}
+#settingsOverlay #settingsPanel{position:relative!important;top:auto!important;left:auto!important;right:auto!important;margin:auto!important}
+#settingsOverlay #closeSettings{position:absolute!important;right:27px!important;top:26px!important;z-index:3!important}
+:is(#practiceOverlay,#leaderboardOverlay,#profileOverlay,#settingsOverlay) :is(button,select,input):not(.swatch){
+ border:2px solid #294b35!important;border-radius:4px!important;box-sizing:border-box!important;
+ box-shadow:none!important;
+}
+#practiceOverlay .practice-popup{display:flex!important;flex-direction:column!important;gap:10px!important}
+#practiceOverlay .practice-popup :is(#fieldPractice,#aceRunPractice,#openHoleMenu){
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;min-height:54px!important;background:#d9ead7!important;
+ color:#23452f!important;font-weight:900!important;
+}
+#practiceOverlay .practice-popup .leave-actions{margin:4px 0 0!important}
+#practiceOverlay #closePractice{background:#fff!important;color:#23452f!important;width:100%!important}
+#leaderboardOverlay #dailyLeaderboard{background:#fff!important;color:#22392b!important}
+#leaderboardOverlay :is(.daily-row,#dailyLeaderboard h3){background:#d9ead7!important;border:2px solid #294b35!important;border-radius:4px!important;padding:9px!important;margin:9px 0!important}
+#leaderboardOverlay #leaderLength{width:100%!important;background:#fff!important;color:#22392b!important;padding:11px!important;font-size:13px!important;font-weight:900!important}
+#leaderboardOverlay :is(#leaderResults,#dailyLeaderboard table){background:#fff!important;color:#22392b!important}
+#leaderboardOverlay #closeLeaderboard,#profileOverlay #closeProfile,#profileOverlay #profileHeaderBack{background:#fff!important;color:#23452f!important;min-width:42px!important;min-height:42px!important}
+#profileOverlay .profile-menu{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+#profileOverlay .profile-menu-tile{width:100%!important;min-height:74px!important;background:#d9ead7!important;color:#23452f!important;text-align:left!important;padding:13px!important}
+#profileOverlay .profile-menu-tile small{color:#496b52!important}
+#profileOverlay :is(.profile-heading,h3){background:#d9ead7!important;color:#23452f!important;border:2px solid #294b35!important;border-radius:4px!important;padding:10px!important}
+#profileOverlay :is(input,select){background:#fff!important;color:#22392b!important;max-width:100%!important}
+#settingsOverlay #settingsPanel>label{display:block!important;background:#d9ead7!important;border:2px solid #294b35!important;border-radius:4px!important;color:#23452f!important;padding:8px 10px!important;margin:14px 0 7px!important;font-size:12px!important}
+#settingsOverlay #settingsPanel :is(.pixel-dropdown-trigger,#savePersonalSettings,#testConnection){width:100%!important;background:#fff!important;color:#23452f!important;padding:12px!important;min-height:44px!important;text-align:center!important}
+#settingsOverlay #settingsPanel .pixel-dropdown-options{background:#fff!important;border:2px solid #294b35!important;z-index:30!important}
+#settingsOverlay #settingsPanel .pixel-dropdown-options button{display:block!important;width:100%!important;background:#fff!important;color:#23452f!important;text-align:left!important;padding:12px!important}
+#settingsOverlay #settingsPanel .daily-panel{background:#fff!important;border:2px solid #294b35!important;border-radius:4px!important;padding:12px!important;margin:12px 0!important}
+#settingsOverlay #settingsPanel .daily-panel h3{background:#d9ead7!important;color:#23452f!important;padding:9px!important;margin:0 0 10px!important}
+#settingsOverlay #settingsPanel #designOptionsPanel>button{width:100%!important;background:#fff!important;color:#23452f!important;margin:5px 0!important}
+@media(max-width:480px){:is(#practiceOverlay,#leaderboardOverlay,#profileOverlay,#settingsOverlay) .hole-popup,#settingsOverlay #settingsPanel{padding:12px!important}}
 </style><style id="editor-readability-fix">#liveEditTools{max-height:min(80dvh,590px)!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;line-height:1.45!important}#liveEditTools select,#liveEditTools button{min-height:30px!important;line-height:1.25!important;white-space:normal!important}#liveEditTools #liveEditStatus{display:block!important;position:static!important;line-height:1.5!important;white-space:normal!important;overflow-wrap:anywhere!important;margin-top:8px!important;padding:6px!important;background:#f0f6e9!important;color:#213b2c!important}#game #message{position:relative!important;line-height:1.45!important;min-height:1.5em!important;white-space:normal!important;overflow-wrap:break-word!important}#course.editing{touch-action:none!important}</style></head><body class="splash-loading"><script>try{const saved=JSON.parse(localStorage.getItem("pixeldisc-personal-settings-v1")||"{}");if(saved.darkMode===true||(saved.darkMode==null&&localStorage.getItem("pixeldisc-dark-mode")==="on"))document.body.classList.add("splash-dark")}catch(e){if(localStorage.getItem("pixeldisc-dark-mode")==="on")document.body.classList.add("splash-dark")}</script><div id="launchSplash" role="button" tabindex="0" aria-label="Pixel Disc loading. Tap to continue"><img src="/pixeldisc_icon2.png?v=2" alt="Pixel Disc" width="260" height="260"></div><script>
 (function(){
  const splash=document.getElementById('launchSplash');
