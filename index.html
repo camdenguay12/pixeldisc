@@ -1336,10 +1336,11 @@ function waterAt(p,h){if((h.bridges||[]).some(([x,y,r],i)=>{const a=-objectRotat
 function dropBesideWater(p,pond){const [x,y,w,hh]=pond,pad=9;const edges=[[x-w/2-pad,Math.max(8,Math.min(432,p[1]))],[x+w/2+pad,Math.max(8,Math.min(432,p[1]))],[Math.max(8,Math.min(312,p[0])),y-hh/2-pad],[Math.max(8,Math.min(312,p[0])),y+hh/2+pad]];return edges.map(q=>[Math.max(8,Math.min(312,q[0])),Math.max(8,Math.min(432,q[1]))]).sort((a,b)=>Math.hypot(a[0]-p[0],a[1]-p[1])-Math.hypot(b[0]-p[0],b[1]-p[1]))[0]}
 // Fences are solid horizontal barriers, matching their rendered posts and rails.
 function fenceContact(p,h,padding=0){
- for(const [x,y,len] of h.fences||[]){
-  const half=Math.max(0,len/2),nearestX=Math.max(x-half,Math.min(x+half,p[0]));
-  const dx=p[0]-nearestX,dy=p[1]-y,limit=12+padding;
-  if(Math.abs(dx)<=limit&&Math.abs(dy)<=limit)return {x:nearestX,y,r:limit};
+ for(const [i,[x,y,len]] of (h.fences||[]).entries()){
+  const a=-objectRotation(h,'fences',i)*Math.PI/180,dx=p[0]-x,dy=p[1]-y;
+  const localX=dx*Math.cos(a)-dy*Math.sin(a),localY=dx*Math.sin(a)+dy*Math.cos(a);
+  const nearestX=Math.max(-len/2,Math.min(len/2,localX)),limit=12+padding;
+  if(Math.abs(localX-nearestX)<=limit&&Math.abs(localY)<=limit)return {x:x+nearestX*Math.cos(-a),y:y+nearestX*Math.sin(-a),r:limit};
  }
  return null;
 }
@@ -1611,7 +1612,7 @@ function riverPath(x,y,length,windy){ctx.beginPath();ctx.moveTo(x,y-length/2);if
 function riverContact(p,h){for(const [x,y,len,shape] of h.rivers||[]){const rad=objectRotation(h,'rivers',(h.rivers||[]).findIndex(o=>o[0]===x&&o[1]===y&&o[2]===len));const a=-rad*Math.PI/180,dx=p[0]-x,dy=p[1]-y,lx=dx*Math.cos(a)-dy*Math.sin(a),ly=dx*Math.sin(a)+dy*Math.cos(a);if(Math.abs(ly)>len/2+12)continue;const bend=shape===1?Math.sin((ly/len+.5)*Math.PI*2)*len*.09:0;if(Math.abs(lx-bend)<12)return [p[0],p[1],28,28]}return null}
 function drawEditorExtras(h){
  ctx.save();ctx.imageSmoothingEnabled=false;
- for(const t of h.trees||[]){if(Number.isInteger(t[3])&&t[3]>=0&&t[3]<pixelTreeCache.length){const r=t[2];const trunkW=Math.max(3,Math.round(r*.4));rect(Math.round(t[0]-trunkW/2),Math.round(t[1]+r*.24),trunkW,Math.max(8,Math.round(r*1.05)),'#79512d');rect(Math.round(t[0]-trunkW/2+1),Math.round(t[1]+r*.24),Math.max(1,Math.round(trunkW*.27)),Math.max(6,Math.round(r*.9)),'#ac7943');ctx.drawImage(pixelTreeCache[t[3]],Math.round(t[0]-r*1.3),Math.round(t[1]-r*1.6),Math.round(r*2.6),Math.round(r*2.8));}}
+ for(const [i,t] of (h.trees||[]).entries()){if(Number.isInteger(t[3])&&t[3]>=0&&t[3]<pixelTreeCache.length){ctx.save();ctx.translate(t[0],t[1]);ctx.rotate(objectRotation(h,'trees',i)*Math.PI/180);ctx.translate(-t[0],-t[1]);const r=t[2];const trunkW=Math.max(3,Math.round(r*.4));rect(Math.round(t[0]-trunkW/2),Math.round(t[1]+r*.24),trunkW,Math.max(8,Math.round(r*1.05)),'#79512d');rect(Math.round(t[0]-trunkW/2+1),Math.round(t[1]+r*.24),Math.max(1,Math.round(trunkW*.27)),Math.max(6,Math.round(r*.9)),'#ac7943');ctx.drawImage(pixelTreeCache[t[3]],Math.round(t[0]-r*1.3),Math.round(t[1]-r*1.6),Math.round(r*2.6),Math.round(r*2.8));ctx.restore();}}
  for(const [i,[x,y,r,shape]] of (h.bridges||[]).entries())rotateObjectCanvas(h,'bridges',i,x,y,()=>{rect(x-r,y-11,r*2,22,'#76502f');for(let j=-r+5;j<r-3;j+=10)rect(x+j,y-9,7,18,'#b78b55');if(shape===1){ctx.strokeStyle='#634022';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x-r,y-11);ctx.quadraticCurveTo(x,y-25,x+r,y-11);ctx.moveTo(x-r,y+11);ctx.quadraticCurveTo(x,y+25,x+r,y+11);ctx.stroke()}else{rect(x-r,y-15,r*2,4,'#634022');rect(x-r,y+11,r*2,4,'#634022')}});
  for(const [i,[x,y,len,shape]] of (h.rivers||[]).entries())rotateObjectCanvas(h,'rivers',i,x,y,()=>{ctx.lineCap='round';ctx.lineJoin='round';riverPath(x,y,len,shape===1);ctx.strokeStyle='#a3d4f4';ctx.lineWidth=31;ctx.stroke();riverPath(x,y,len,shape===1);ctx.strokeStyle='#75b8e7';ctx.lineWidth=24;ctx.stroke();riverPath(x,y,len,shape===1);ctx.strokeStyle='#d8efff';ctx.lineWidth=2;ctx.setLineDash([9,18]);ctx.stroke();ctx.setLineDash([])});
  for(const [i,[x,y,r]] of (h.deadTrees||[]).entries())rotateObjectCanvas(h,'deadTrees',i,x,y,()=>drawDeadTree(x,y,r));
