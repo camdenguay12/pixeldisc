@@ -19,6 +19,6 @@ CREATE TABLE IF NOT EXISTS ace_runs (id TEXT PRIMARY KEY, player_id TEXT NOT NUL
 CREATE INDEX IF NOT EXISTS ace_runs_daily ON ace_runs(day,player_id,aces DESC);
 
 -- Published layouts override the bundled course for all players.
-CREATE TABLE IF NOT EXISTS published_holes (hole_id INTEGER PRIMARY KEY CHECK(hole_id BETWEEN 0 AND 35),layout TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')));
+CREATE TABLE IF NOT EXISTS published_holes (hole_id INTEGER PRIMARY KEY CHECK(hole_id BETWEEN 0 AND 53),layout TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')));
 -- PIN attempts are throttled by an IP-derived hash; no IP address is stored.
 CREATE TABLE IF NOT EXISTS editor_attempts (client_id TEXT PRIMARY KEY,failures INTEGER NOT NULL DEFAULT 0,blocked_until INTEGER NOT NULL DEFAULT 0);
