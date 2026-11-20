@@ -1115,7 +1115,34 @@ function cactusObstacleAt(p,h){
 function drawDeadTree(x,y,r){const k=r/22;ctx.save();ctx.translate(x,y);ctx.scale(k,k);rect(-4,-23,9,46,'#66513e');rect(-2,-22,4,39,'#a48b68');rect(-17,-12,15,5,'#66513e');rect(-19,-20,5,12,'#66513e');rect(4,-6,16,5,'#66513e');rect(15,-15,5,11,'#66513e');rect(-3,17,4,6,'#48382c');ctx.restore()}
 function drawMudPuddle(x,y,r){ctx.save();ctx.fillStyle='#6c4b30';ctx.beginPath();ctx.ellipse(x,y,r,r*.57,-.08,0,Math.PI*2);ctx.fill();ctx.fillStyle='#956a43';ctx.beginPath();ctx.ellipse(x-r*.1,y-r*.08,r*.79,r*.41,-.08,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b18a60';ctx.beginPath();ctx.ellipse(x-r*.26,y-r*.19,r*.35,r*.12,-.08,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5c3d2c';for(const [dx,dy] of [[-.55,.15],[.42,.17],[.12,-.29]]){ctx.beginPath();ctx.ellipse(x+r*dx,y+r*dy,Math.max(2,r*.11),Math.max(2,r*.065),0,0,Math.PI*2);ctx.fill()}ctx.restore()}
 function drawGreenBarrel(x,y,r){const k=r/17;ctx.save();ctx.translate(x,y);ctx.scale(k,k);rect(-13,-16,26,32,'#254b38');rect(-11,-14,22,28,'#41865a');rect(-11,-12,5,24,'#62a26e');rect(-13,-16,26,5,'#193d30');rect(-13,11,26,5,'#193d30');rect(-8,-12,16,3,'#80b588');ctx.restore()}
-function drawGrassyHill(x,y,r){ctx.save();ctx.fillStyle='#8fbd70';ctx.beginPath();ctx.ellipse(x,y+3,r,r*.6,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b0d98a';ctx.beginPath();ctx.ellipse(x-r*.12,y-r*.13,r*.78,r*.42,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#609953';ctx.lineWidth=2;for(let dx=-r*.6;dx<=r*.6;dx+=Math.max(8,r*.32)){ctx.beginPath();ctx.moveTo(x+dx,y+r*.17);ctx.lineTo(x+dx-3,y+r*.06);ctx.moveTo(x+dx,y+r*.17);ctx.lineTo(x+dx+3,y+r*.02);ctx.stroke()}ctx.restore()}
+function drawGrassyHill(x,y,r){
+ // Crisp, stepped pixel-art earth mound with tufts rising from its grassy crest.
+ const k=r/30;ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(k,k);
+ const block=(x,y,w,h,c)=>rect(x,y,w,h,c);
+ // Terraced silhouette: wider at the bottom, narrow and raised at the crown.
+ block(-29,8,58,8,'#597947');block(-25,2,50,13,'#6d8b4b');
+ block(-20,-4,40,16,'#78994f');block(-13,-10,26,19,'#87a858');
+ // Brown earth at the foot and irregular dark-green edge pixels.
+ block(-24,12,48,4,'#736b43');block(-17,10,34,4,'#82774a');
+ block(-29,7,7,5,'#456d3e');block(22,7,7,5,'#456d3e');
+ // Stepped grass cap, deliberately no ellipses or smooth strokes.
+ block(-22,-5,44,5,'#4d8e43');block(-18,-10,36,6,'#65a74e');
+ block(-11,-13,22,5,'#81c65d');block(-7,-15,14,3,'#a0d777');
+ block(-20,-5,6,3,'#9bd275');block(11,-7,8,3,'#9bd275');
+ // Individual pixel grass blades sticking up from the crown.
+ const tufts=[[-18,-10],[-9,-15],[0,-17],[11,-13],[19,-7]];
+ for(const [gx,gy] of tufts){
+  block(gx,gy-7,3,9,'#387c3c');
+  block(gx-3,gy-5,3,3,'#55a64a');
+  block(gx+3,gy-4,3,4,'#65b953');
+  block(gx,gy-10,2,4,'#80ca60');
+ }
+ // Small blocky highlights and shadow steps add volume.
+ block(-18,0,9,3,'#a4c56c');block(-6,-3,8,3,'#b0d477');
+ block(11,1,9,3,'#91b761');block(-23,5,7,4,'#526e3d');
+ block(16,8,8,4,'#526e3d');
+ ctx.restore();
+}
 function drawDesertCactus(x,y,r){
  const k=r/19;ctx.save();ctx.translate(x,y);ctx.scale(k,k);
  rect(-4,-20,9,39,'#275d43');rect(-2,-18,5,33,'#4a9861');
