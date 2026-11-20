@@ -1614,14 +1614,14 @@ function drawEditorExtras(h){
  for(const t of h.trees||[]){if(Number.isInteger(t[3])&&t[3]>=0&&t[3]<pixelTreeCache.length){const r=t[2];const trunkW=Math.max(3,Math.round(r*.4));rect(Math.round(t[0]-trunkW/2),Math.round(t[1]+r*.24),trunkW,Math.max(8,Math.round(r*1.05)),'#79512d');rect(Math.round(t[0]-trunkW/2+1),Math.round(t[1]+r*.24),Math.max(1,Math.round(trunkW*.27)),Math.max(6,Math.round(r*.9)),'#ac7943');ctx.drawImage(pixelTreeCache[t[3]],Math.round(t[0]-r*1.3),Math.round(t[1]-r*1.6),Math.round(r*2.6),Math.round(r*2.8));}}
  for(const [i,[x,y,r,shape]] of (h.bridges||[]).entries())rotateObjectCanvas(h,'bridges',i,x,y,()=>{rect(x-r,y-11,r*2,22,'#76502f');for(let j=-r+5;j<r-3;j+=10)rect(x+j,y-9,7,18,'#b78b55');if(shape===1){ctx.strokeStyle='#634022';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x-r,y-11);ctx.quadraticCurveTo(x,y-25,x+r,y-11);ctx.moveTo(x-r,y+11);ctx.quadraticCurveTo(x,y+25,x+r,y+11);ctx.stroke()}else{rect(x-r,y-15,r*2,4,'#634022');rect(x-r,y+11,r*2,4,'#634022')}});
  for(const [i,[x,y,len,shape]] of (h.rivers||[]).entries())rotateObjectCanvas(h,'rivers',i,x,y,()=>{ctx.lineCap='round';ctx.lineJoin='round';riverPath(x,y,len,shape===1);ctx.strokeStyle='#a3d4f4';ctx.lineWidth=31;ctx.stroke();riverPath(x,y,len,shape===1);ctx.strokeStyle='#75b8e7';ctx.lineWidth=24;ctx.stroke();riverPath(x,y,len,shape===1);ctx.strokeStyle='#d8efff';ctx.lineWidth=2;ctx.setLineDash([9,18]);ctx.stroke();ctx.setLineDash([])});
- for(const [x,y,r] of h.deadTrees||[])drawDeadTree(x,y,r);
- for(const [x,y,r] of h.greenBarrels||[])drawGreenBarrel(x,y,r);
- for(const [x,y,r] of h.grassyHills||[])drawGrassyHill(x,y,r);
- for(const [x,y,r] of h.mudPuddles||[])drawMudPuddle(x,y,r);
+ for(const [i,[x,y,r]] of (h.deadTrees||[]).entries())rotateObjectCanvas(h,'deadTrees',i,x,y,()=>drawDeadTree(x,y,r));
+ for(const [i,[x,y,r]] of (h.greenBarrels||[]).entries())rotateObjectCanvas(h,'greenBarrels',i,x,y,()=>drawGreenBarrel(x,y,r));
+ for(const [i,[x,y,r]] of (h.grassyHills||[]).entries())rotateObjectCanvas(h,'grassyHills',i,x,y,()=>drawGrassyHill(x,y,r));
+ for(const [i,[x,y,r]] of (h.mudPuddles||[]).entries())rotateObjectCanvas(h,'mudPuddles',i,x,y,()=>drawMudPuddle(x,y,r));
  for(const [x,y,r] of h.tires||[]){ctx.save();ctx.strokeStyle='#242827';ctx.lineWidth=Math.max(5,r*.35);ctx.beginPath();ctx.arc(x,y,r*.72,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#59605b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r*.44,0,Math.PI*2);ctx.stroke();ctx.restore()}
  for(const [x,y,r] of h.largeRocks||[]){rect(x-r,y-r*.5,r*2,r,'#667375');rect(x-r*.8,y-r*.65,r*1.5,r*.55,'#bac5c1');rect(x-r*.5,y-r*.55,r*.7,4,'#e1e4d7')}
- for(const [x,y,r] of h.cacti||[])drawDesertCactus(x,y,r);
- for(const [x,y,r] of h.tumbleweeds||[])drawDesertTumbleweed(x,y,r);
+ for(const [i,[x,y,r]] of (h.cacti||[]).entries())rotateObjectCanvas(h,'cacti',i,x,y,()=>drawDesertCactus(x,y,r));
+ for(const [i,[x,y,r]] of (h.tumbleweeds||[]).entries())rotateObjectCanvas(h,'tumbleweeds',i,x,y,()=>drawDesertTumbleweed(x,y,r));
  for(const [i,[x,y,len]] of (h.fences||[]).entries())rotateObjectCanvas(h,'fences',i,x,y,()=>{for(let dx=-len/2;dx<=len/2;dx+=12){rect(x+dx-2,y-12,5,24,'#8a5a32');rect(x+dx-1,y-10,2,20,'#bd8751')}rect(x-len/2,y-7,len,4,'#a46d3b');rect(x-len/2,y+5,len,4,'#a46d3b')})
  ctx.restore();
 }
