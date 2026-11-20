@@ -37,14 +37,15 @@ export default {async fetch(request,env){
   const id=data.id,layout=data.layout;
   const extended=layout?.longHole===true||layout?.bonus===true;
   const minY=extended?-240:0;
-  const validPoint=p=>Array.isArray(p)&&p.length===2&&p[0]>=0&&p[0]<=320&&p[1]>=minY&&p[1]<=440&&p.every(Number.isFinite);
+  const maxX=layout?.horizontalHole===true?570:320;
+  const validPoint=p=>Array.isArray(p)&&p.length===2&&p[0]>=0&&p[0]<=maxX&&p[1]>=minY&&p[1]<=440&&p.every(Number.isFinite);
   const validList=(arr,kind)=>Array.isArray(arr)&&arr.length<=150&&arr.every(o=>{
-   if(!Array.isArray(o)||o[0]<0||o[0]>320||o[1]<minY||o[1]>440||!Number.isFinite(o[0])||!Number.isFinite(o[1]))return false;
+   if(!Array.isArray(o)||o[0]<0||o[0]>maxX||o[1]<minY||o[1]>440||!Number.isFinite(o[0])||!Number.isFinite(o[1]))return false;
    if(kind==='sandDunes')return o.length===4&&Number.isFinite(o[2])&&o[2]>=5&&o[2]<=100&&Number.isInteger(o[3])&&o[3]>=0&&o[3]<=2;
    if(kind==='trees')return (o.length===3||o.length===4)&&Number.isFinite(o[2])&&o[2]>=3&&o[2]<=100&&(o.length===3||(Number.isInteger(o[3])&&o[3]>=0&&o[3]<=11));
    return o.length===(kind==='ponds'?4:3)&&o.slice(2).every(n=>Number.isFinite(n)&&n>=3&&n<=300);
   });
-  const validMando=m=>m===undefined||(Array.isArray(m)&&m.length===3&&m[0]>=0&&m[0]<=320&&m[1]>=minY&&m[1]<=440&&Number.isFinite(m[0])&&Number.isFinite(m[1])&&['left','right'].includes(m[2]));
+  const validMando=m=>m===undefined||(Array.isArray(m)&&m.length===3&&m[0]>=0&&m[0]<=maxX&&m[1]>=minY&&m[1]<=440&&Number.isFinite(m[0])&&Number.isFinite(m[1])&&['left','right'].includes(m[2]));
   if(!Number.isInteger(id)||id<0||id>53||!layout||typeof layout!=='object'||Array.isArray(layout)||!validPoint(layout.tee)||!validPoint(layout.basket)||!validList(layout.trees,'trees')||!validList(layout.rocks,'rocks')||!validList(layout.ponds,'ponds')||(layout.pondShapes!==undefined&&(!Array.isArray(layout.pondShapes)||layout.pondShapes.length>layout.ponds.length||!layout.pondShapes.every(v=>v===null||v==='rectangle'||v==='oval')))||!validList(layout.cows||[],'cows')||!validList(layout.fences||[],'fences')||!validList(layout.largeRocks||[],'largeRocks')||!validList(layout.cacti||[],'cacti')||!validList(layout.tumbleweeds||[],'tumbleweeds')||!validList(layout.sandDunes||[],'sandDunes')||!validList(layout.bridges||[],'bridges')||!validList(layout.tires||[],'tires')||(layout.sandDunes?.length>0&&layout.desert!==true)||!validMando(layout.mando)||!Number.isInteger(layout.par)||layout.par<2||layout.par>6||typeof layout.name!=='string'||layout.name.length>80)return respond({ok:false,error:'Invalid hole layout'},400);
   const json=JSON.stringify(layout);
   if(json.length>24000)return respond({ok:false,error:'Layout too large'},413);
