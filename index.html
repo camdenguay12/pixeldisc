@@ -1164,9 +1164,26 @@ function drawDesertTumbleweed(x,y,r){
  ctx.save();ctx.translate(x,y);ctx.strokeStyle='#8e623e';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.8,0,Math.PI*2);ctx.moveTo(-r*.7,-r*.5);ctx.lineTo(r*.65,r*.5);ctx.moveTo(-r*.7,r*.5);ctx.lineTo(r*.65,-r*.6);ctx.moveTo(-r,0);ctx.lineTo(r,0);ctx.moveTo(0,-r);ctx.lineTo(0,r);ctx.stroke();ctx.restore()
 }
 // Small winding stream crossing the upper-left edge of Birch Park hole 4.
-const birchFourStream=[[-8,18],[16,28],[33,43],[27,62],[43,79],[59,91],[65,110]];
-function birchFourStreamHit(p){for(let i=1;i<birchFourStream.length;i++){const a=birchFourStream[i-1],b=birchFourStream[i],dx=b[0]-a[0],dy=b[1]-a[1],t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy)));const x=a[0]+t*dx,y=a[1]+t*dy;if(Math.hypot(p[0]-x,p[1]-y)<9)return [x,y,22,22]}return null}
-function drawBirchFourStream(){ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(...birchFourStream[0]);for(let i=1;i<birchFourStream.length-1;i++){const a=birchFourStream[i],b=birchFourStream[i+1];ctx.quadraticCurveTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2)}ctx.lineTo(...birchFourStream[birchFourStream.length-1]);ctx.lineWidth=25;ctx.strokeStyle='#87ad79';ctx.stroke();ctx.lineWidth=19;ctx.strokeStyle='#387e9b';ctx.stroke();ctx.lineWidth=12;ctx.strokeStyle='#65b3cf';ctx.stroke();ctx.lineWidth=3;ctx.strokeStyle='#b3e4e8';ctx.setLineDash([7,16]);ctx.stroke();ctx.restore()}
+// Birch Park hole 4: a narrow winding river enters from the left and exits at the top.
+const birchFourStream=[[-18,112],[9,107],[25,96],[30,79],[47,66],[52,49],[48,32],[64,15],[68,-16]];
+function birchFourStreamHit(p){
+ for(let i=1;i<birchFourStream.length;i++){
+  const a=birchFourStream[i-1],b=birchFourStream[i],dx=b[0]-a[0],dy=b[1]-a[1];
+  const t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy)));
+  const x=a[0]+t*dx,y=a[1]+t*dy;
+  if(Math.hypot(p[0]-x,p[1]-y)<11)return [x,y,28,28];
+ }
+ return null;
+}
+function drawBirchFourStream(){
+ ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+ // Reuse the soft-blue water palette and pale shoreline of the other course ponds.
+ const trace=()=>{ctx.beginPath();ctx.moveTo(...birchFourStream[0]);for(let i=1;i<birchFourStream.length-1;i++){const a=birchFourStream[i],b=birchFourStream[i+1];ctx.quadraticCurveTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2)}ctx.lineTo(...birchFourStream[birchFourStream.length-1])};
+ trace();ctx.lineWidth=29;ctx.strokeStyle='#a3d4f4';ctx.stroke();
+ trace();ctx.lineWidth=22;ctx.strokeStyle='#75b8e7';ctx.stroke();
+ trace();ctx.lineWidth=2;ctx.strokeStyle='#d8efff';ctx.setLineDash([9,19]);ctx.stroke();
+ ctx.restore();
+}
 function drawScenicRoad(h){
  if(h.roadSegments?.length){
   ctx.save();ctx.beginPath();const segments=h.roadSegments;
