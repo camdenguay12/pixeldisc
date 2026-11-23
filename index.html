@@ -1112,7 +1112,36 @@ function cactusObstacleAt(p,h){
  }
  return null;
 }
-function drawDeadTree(x,y,r){const k=r/22;ctx.save();ctx.translate(x,y);ctx.scale(k,k);rect(-4,-23,9,46,'#66513e');rect(-2,-22,4,39,'#a48b68');rect(-17,-12,15,5,'#66513e');rect(-19,-20,5,12,'#66513e');rect(4,-6,16,5,'#66513e');rect(15,-15,5,11,'#66513e');rect(-3,17,4,6,'#48382c');ctx.restore()}
+function drawDeadTree(x,y,r){
+ // Bare, crooked pixel-art snag: long pointed limbs, splintered twigs and no foliage.
+ const k=r/27;
+ ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(k,k);ctx.imageSmoothingEnabled=false;
+ const branch=(pts,width,color)=>{ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.lineWidth=width;ctx.strokeStyle=color;ctx.lineCap='square';ctx.lineJoin='miter';ctx.stroke()};
+ // Tapered, irregular trunk with a splintered crown.
+ ctx.fillStyle='#554333';ctx.beginPath();ctx.moveTo(-7,25);ctx.lineTo(-5,2);ctx.lineTo(-7,-13);ctx.lineTo(-3,-27);ctx.lineTo(-1,-40);ctx.lineTo(2,-30);ctx.lineTo(4,-15);ctx.lineTo(7,4);ctx.lineTo(9,25);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#9b8060';ctx.beginPath();ctx.moveTo(-4,22);ctx.lineTo(-3,0);ctx.lineTo(-4,-13);ctx.lineTo(-1,-27);ctx.lineTo(0,-33);ctx.lineTo(1,-16);ctx.lineTo(3,2);ctx.lineTo(4,22);ctx.closePath();ctx.fill();
+ // Jagged branches reach upward and outward at different angles.
+ const dark='#594634',light='#8e7354';
+ branch([[-3,-19],[-14,-26],[-22,-35],[-26,-45]],5,dark);
+ branch([[-18,-31],[-31,-32],[-37,-39]],3,dark);
+ branch([[-22,-35],[-18,-46],[-20,-53]],2,light);
+ branch([[-14,-26],[-17,-15],[-25,-10]],3,dark);
+ branch([[3,-22],[15,-32],[23,-44],[26,-52]],5,dark);
+ branch([[15,-32],[28,-29],[37,-35]],3,dark);
+ branch([[23,-44],[17,-53],[19,-59]],2,light);
+ branch([[6,-8],[20,-14],[30,-23],[35,-32]],4,dark);
+ branch([[22,-17],[30,-11],[38,-12]],2,light);
+ branch([[-4,0],[-17,-5],[-27,-16],[-31,-23]],4,dark);
+ branch([[-18,-7],[-29,0],[-34,-2]],2,light);
+ branch([[4,7],[14,3],[21,-5]],3,dark);
+ // Short broken spurs and bright bark cracks.
+ branch([[-8,-14],[-14,-21]],2,light);
+ branch([[10,-24],[13,-39]],2,light);
+ branch([[-1,-29],[-5,-39]],2,dark);
+ rect(-3,-10,2,12,'#c0a17a');rect(3,8,2,9,'#70543d');
+ rect(-8,23,18,4,'#46362b');
+ ctx.restore();
+}
 function drawMudPuddle(x,y,r){ctx.save();ctx.fillStyle='#6c4b30';ctx.beginPath();ctx.ellipse(x,y,r,r*.57,-.08,0,Math.PI*2);ctx.fill();ctx.fillStyle='#956a43';ctx.beginPath();ctx.ellipse(x-r*.1,y-r*.08,r*.79,r*.41,-.08,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b18a60';ctx.beginPath();ctx.ellipse(x-r*.26,y-r*.19,r*.35,r*.12,-.08,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5c3d2c';for(const [dx,dy] of [[-.55,.15],[.42,.17],[.12,-.29]]){ctx.beginPath();ctx.ellipse(x+r*dx,y+r*dy,Math.max(2,r*.11),Math.max(2,r*.065),0,0,Math.PI*2);ctx.fill()}ctx.restore()}
 function drawGreenBarrel(x,y,r){const k=r/17;ctx.save();ctx.translate(x,y);ctx.scale(k,k);rect(-13,-16,26,32,'#254b38');rect(-11,-14,22,28,'#41865a');rect(-11,-12,5,24,'#62a26e');rect(-13,-16,26,5,'#193d30');rect(-13,11,26,5,'#193d30');rect(-8,-12,16,3,'#80b588');ctx.restore()}
 function drawTinyBench(x,y,r){
