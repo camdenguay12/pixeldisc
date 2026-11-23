@@ -2018,7 +2018,39 @@ if ("serviceWorker" in navigator) {
  el('liveBridgeShape').onchange=()=>{if(!active||!selected||selected.type!=='bridges')return;snapshot();holes[hole].bridges[selected.i][3]=Number(el('liveBridgeShape').value);draw()};
  el('liveRiverShape').onchange=()=>{if(!active||!selected||selected.type!=='rivers')return;snapshot();holes[hole].rivers[selected.i][3]=Number(el('liveRiverShape').value);draw()};
  el('liveEditUndo').onclick=()=>{if(!undo.length)return;holes[hole]=undo.pop();selected=null;draw();note('Last change undone.')};
- el('liveEditSave').onclick=async()=>{const btn=el('liveEditSave');if(saving)return;if(!/^\d{4}$/.test(editorPin)){note('Unlock the editor with your Cloudflare PIN first.');return}saving=true;btn.disabled=true;el('liveEditExit').disabled=true;note('Publishing this hole for all players…');try{const response=await fetch(publishedCourseAPI+'/courses/publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:editorPin,id:hole,layout:holes[hole]})});const result=await response.json();if(!response.ok||!result.ok)throw Error(result.error||'Publish failed');const check=await fetch(publishedCourseAPI+'/courses?verify='+Date.now(),{cache:'no-store'});if(!check.ok)throw Error('Published, but verification request failed');const remote=await check.json();const saved=remote.holes?.find(x=>Number(x.id)===hole);if(!saved||JSON.stringify(saved.layout)!==JSON.stringify(holes[hole]))throw Error('Server did not return the saved hole exactly; keep edits and retry');const confirmed=clone(saved.layout);holes[hole]=confirmed;publishedSnapshot=clone(confirmed);original=clone(confirmed);const all=drafts();delete all[hole];saveDrafts(all);dirty=false;undo=[];selected=null;loadHole();draw();note('VERIFIED SAVED: Changes are now applied to this hole. Exit to play the updated course.')}catch(e){note('NOT PUBLISHED: '+e.message+'. Your edits remain on this screen.')}finally{saving=false;btn.disabled=false;el('liveEditExit').disabled=false}};
+ el('liveEditSave').onclick=async()=>{
+ const btn=el('liveEditSave');if(saving)return;
+ if(!/^\\d{4}$/.test(editorPin)){note('Unlock the editor with your Cloudflare PIN first.');return}
+ const target=editorHoleId;
+ if(!Number.isInteger(target)||target!==hole||!holes[target]){note('Save blocked: the selected hole changed. Reopen the editor on the intended hole.');return}
+ const layout=clone(holes[target]);
+ saving=true;btn.disabled=true;el('liveEditExit').disabled=true;el('liveEditTest').disabled=true;
+ note('Publishing hole '+courseHoleNumber(target)+'…');
+ let accepted=false;
+ try{
+  const response=await fetch(publishedCourseAPI+'/courses/publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:editorPin,id:target,layout})});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.ok)throw Error(result.error||'Server returned HTTP '+response.status);
+  accepted=true;
+  // Publishing is confirmed by the POST. Read-back is an additional check, not another publish.
+  let verified=false,verifyIssue='';
+  try{
+   const check=await fetch(publishedCourseAPI+'/courses?verify='+Date.now(),{cache:'no-store'});
+   if(!check.ok)throw Error('Read-back HTTP '+check.status);
+   const remote=await check.json();
+   const saved=remote.holes?.find(x=>Number(x.id)===target);
+   if(!saved||JSON.stringify(saved.layout)!==JSON.stringify(layout))throw Error('Read-back did not match the submitted layout');
+   verified=true;
+  }catch(e){verifyIssue=e.message}
+  holes[target]=clone(layout);publishedSnapshot=clone(layout);original=clone(layout);
+  const all=drafts();delete all[target];saveDrafts(all);
+  dirty=false;undo=[];selected=null;
+  loadHole();draw();
+  note(verified?'VERIFIED SAVED: Hole '+courseHoleNumber(target)+' published.':'PUBLISHED: Server accepted hole '+courseHoleNumber(target)+'. Verification unavailable ('+verifyIssue+'). Reopen to confirm.');
+ }catch(e){
+  note((accepted?'PUBLISHED, BUT FOLLOW-UP FAILED: ':'NOT PUBLISHED: ')+e.message+'. Your edits remain available.');
+ }finally{saving=false;btn.disabled=false;el('liveEditExit').disabled=false;el('liveEditTest').disabled=false}
+};
  el('liveEditTest').onclick=()=>{try{const all=drafts();all[hole]=clone(holes[hole]);saveDrafts(all);exit();loadHole();draw();note('Playtest loaded. Use + EDIT to make more changes.')}catch(e){note('Save failed: '+e.message)}};
  el('liveEditExit').onclick=()=>{if(saving){note('Wait for publishing to finish before exiting.');return}if(dirty&&!confirm('Discard unsaved changes and restore the hole as it was before editing?'))return;const editingHole=editorHoleId;const lastPublished=clone(publishedSnapshot||original);if(!lastPublished){note('Cannot safely exit: original layout unavailable.');return}holes[editingHole]=lastPublished;const all=drafts();delete all[editingHole];saveDrafts(all);dirty=false;exit();loadHole();draw();note('Unsaved edits discarded. Published hole restored.')};
  document.addEventListener('click',e=>{if(e.target.closest('[data-practice-hole]')||e.target.id==='practicePrev'||e.target.id==='practiceNext')setTimeout(refresh,0);if(e.target.id==='homeBtn'||e.target.id==='backBtn')setTimeout(refresh,0)});
